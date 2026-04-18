@@ -1,27 +1,22 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const API_URL = 'http://192.168.0.106:3000/api';
+import env from '../config/env';
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: env.API_URL,
   timeout: 8000,
 });
 
-// ── Token cache en memoria ────────────────────────────────────────
-// Evita leer AsyncStorage en cada request (I/O async innecesario).
-// Se carga una vez y se invalida en logout / 401.
+// Token cache en memoria para evitar leer AsyncStorage en cada request
 let _cachedToken = null;
 
 export const setAuthToken  = (token) => { _cachedToken = token; };
 export const clearAuthToken = ()     => { _cachedToken = null;  };
 
-// Pre-carga el token al iniciar la app para que el primer request
-// no tenga que esperar AsyncStorage.
+// Pre-carga el token al iniciar la app
 AsyncStorage.getItem('token').then(t => { if (t) _cachedToken = t; });
 
 api.interceptors.request.use(async (config) => {
-  // Solo va a AsyncStorage si aún no tenemos el token en memoria
   if (!_cachedToken) {
     _cachedToken = await AsyncStorage.getItem('token');
   }
@@ -34,7 +29,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      _cachedToken = null; // invalida cache
+      _cachedToken = null;
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
     }
