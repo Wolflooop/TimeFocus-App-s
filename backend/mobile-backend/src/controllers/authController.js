@@ -10,7 +10,11 @@ exports.login = async (req, res) => {
     const user = rows[0];
     const valid = await bcrypt.compare(password, user.contrasena_hash);
     if (!valid) return res.status(401).json({ error: 'Credenciales inválidas' });
-    const token = jwt.sign({ id: user.id_usuario, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { id: user.id_usuario, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
     res.json({ token, user: { id: user.id_usuario, nombre: user.nombre, email: user.email } });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -30,14 +34,17 @@ exports.register = async (req, res) => {
     const token = jwt.sign({ id: result.insertId, email }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ token, user: { id: result.insertId, nombre, email } });
   } catch (err) {
-    console.log('ERROR COMPLETO:', err);
+    console.error('ERROR REGISTER:', err);
     res.status(500).json({ error: err.message });
-}
+  }
 };
 
 exports.me = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id_usuario, nombre, apellido_paterno, email FROM usuarios WHERE id_usuario = ?', [req.user.id]);
+    const [rows] = await pool.query(
+      'SELECT id_usuario, nombre, apellido_paterno, email FROM usuarios WHERE id_usuario = ?',
+      [req.user.id]
+    );
     if (!rows.length) return res.status(404).json({ error: 'Usuario no encontrado' });
     res.json(rows[0]);
   } catch (err) {
