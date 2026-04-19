@@ -1,59 +1,78 @@
-import React, { useState, useRef } from 'react';
+// src/screens/auth/LoginScreen.js
+// – Login con email/contraseña
+// – Botón Google Sign-In (@react-native-google-signin/google-signin)
+// – Link "¿Olvidaste tu contraseña?" → ForgotPasswordScreen
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
   ScrollView, KeyboardAvoidingView, Platform, Animated,
-  ActivityIndicator, Dimensions, StatusBar
+  ActivityIndicator, StatusBar, Alert,
 } from 'react-native';
 import { colors } from '../../theme/colors';
-import { login } from '../../services/authService';
+import { login, loginWithGoogle } from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
-import GoogleIcon from '../../components/icons/GoogleIcon';
 import EyeIcon from '../../components/icons/EyeIcon';
+import GoogleIcon from '../../components/icons/GoogleIcon';
+import { font, space, radius, rv, rs } from '../../theme/responsive';
 
-const { width: W, height: H } = Dimensions.get('window');
+// Importar Google Sign-In si está instalado
+let GoogleSignin = null;
+let statusCodes  = null;
+try {
+  const pkg = require('@react-native-google-signin/google-signin');
+  GoogleSignin = pkg.GoogleSignin;
+  statusCodes  = pkg.statusCodes;
+} catch (_) {}
+
+const C = {
+  navy:   colors.primary,
+  accent: colors.accent,
+  muted:  colors.textSecondary,
+  bg:     '#fff',
+  error:  colors.error,
+};
 
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState('');
+  const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [errors,   setErrors]   = useState({});
+  const [loading,  setLoading]  = useState(false);
+  const [gLoading, setGLoading] = useState(false);
   const { signIn } = useAuth();
   const shakeAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim  = useRef(new Animated.Value(0)).current;
 
-  // ── DEV ONLY: exponer signIn para consola ─────────────
-  React.useEffect(() => {
-    if (__DEV__) {
-      globalThis.__authSignIn = signIn;
-      console.log('[DEV] __authSignIn listo en consola');
+  useEffect(() => {
+    Animated.timing(fadeAnim, { toValue:1, duration:400, useNativeDriver:true }).start();
+    // Configurar Google Sign-In
+    if (GoogleSignin) {
+      GoogleSignin.configure({
+        webClientId: 'TU_WEB_CLIENT_ID.apps.googleusercontent.com', // ← de Google Console
+        offlineAccess: false,
+      });
     }
+    // DEV helper
+    if (__DEV__) globalThis.__authSignIn = signIn;
     return () => { if (__DEV__) delete globalThis.__authSignIn; };
   }, [signIn]);
-  // ── FIN DEV ───────────────────────────────────────────
 
-  React.useEffect(() => {
-    Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-  }, []);
-
-  const shake = () => {
-    Animated.sequence([
-      Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -10, duration: 60, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
-    ]).start();
-  };
+  const shake = () => Animated.sequence([
+    Animated.timing(shakeAnim, { toValue:10,  duration:60, useNativeDriver:true }),
+    Animated.timing(shakeAnim, { toValue:-10, duration:60, useNativeDriver:true }),
+    Animated.timing(shakeAnim, { toValue:10,  duration:60, useNativeDriver:true }),
+    Animated.timing(shakeAnim, { toValue:0,   duration:60, useNativeDriver:true }),
+  ]).start();
 
   const validate = () => {
     const e = {};
-    if (!email) e.email = 'El correo es requerido';
+    if (!email)                     e.email = 'El correo es requerido';
     else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Correo no válido';
-    if (!password) e.password = 'La contraseña es requerida';
-    else if (password.length < 6) e.password = 'Mínimo 6 caracteres';
+    if (!password)                  e.password = 'La contraseña es requerida';
+    else if (password.length < 6)   e.password = 'Mínimo 6 caracteres';
     setErrors(e);
-    if (Object.keys(e).length > 0) shake();
-    return Object.keys(e).length === 0;
+    if (Object.keys(e).length) shake();
+    return !Object.keys(e).length;
   };
 
   const handleLogin = async () => {
@@ -63,78 +82,127 @@ export default function LoginScreen({ navigation }) {
       const data = await login(email, password);
       signIn(data.user);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al iniciar sesión';
-      setErrors({ general: msg });
+      setErrors({ general: err.response?.data?.error || 'Error al iniciar sesión. Verifica tu conexión.' });
       shake();
-    } finally {
-      setLoading(false);
+    } finally { setLoading(false); }
+  };
+
+  const handleGoogle = async () => {
+    if (!GoogleSignin) {
+      Alert.alert(
+        'Google Sign-In',
+        'Instala @react-native-google-signin/google-signin y configura GOOGLE_CLIENT_ID en el backend.\n\nVer README.md para instrucciones.',
+      );
+      return;
     }
+    setGLoading(true);
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const { idToken } = await GoogleSignin.getTokens();
+      const data = await loginWithGoogle(idToken);
+      signIn(data.user);
+    } catch (err) {
+      if (err.code === statusCodes?.SIGN_IN_CANCELLED) return;
+      if (err.code === statusCodes?.IN_PROGRESS) return;
+      setErrors({ general: err.response?.data?.error || 'Error con Google Sign-In' });
+      shake();
+    } finally { setGLoading(false); }
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <ScrollView style={s.container} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
-        <Animated.View style={{ opacity: fadeAnim }}>
+    <KeyboardAvoidingView style={{ flex:1 }} behavior={Platform.OS==='ios'?'padding':undefined}>
+      <StatusBar barStyle="dark-content" backgroundColor={C.bg}/>
+      <ScrollView
+        style={{ flex:1, backgroundColor:C.bg }}
+        contentContainerStyle={s.content}
+        keyboardShouldPersistTaps="handled">
+
+        <Animated.View style={{ opacity:fadeAnim, transform:[{translateX:shakeAnim}] }}>
           <Text style={s.title}>Bienvenido 👋</Text>
           <Text style={s.subtitle}>Inicia sesión en tu cuenta</Text>
 
-          <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
-            <Text style={s.label}>CORREO ELECTRÓNICO</Text>
+          {/* Email */}
+          <Text style={s.label}>Correo electrónico</Text>
+          <TextInput
+            style={[s.input, errors.email && s.inputError]}
+            placeholder="ana.garcia@utxj.edu.mx"
+            placeholderTextColor={C.muted}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={t => { setEmail(t); setErrors(e=>({...e,email:undefined})); }}
+            returnKeyType="next"
+          />
+          {!!errors.email && <Text style={s.errorTxt}>{errors.email}</Text>}
+
+          {/* Password */}
+          <Text style={[s.label,{marginTop:rv(14)}]}>Contraseña</Text>
+          <View style={s.passWrap}>
             <TextInput
-              style={[s.input, errors.email && s.inputError]}
-              placeholder="correo@ejemplo.com"
-              placeholderTextColor="#aaa"
-              value={email}
-              onChangeText={t => { setEmail(t); setErrors(e => ({ ...e, email: null })); }}
-              keyboardType="email-address"
-              autoCapitalize="none"
+              style={[s.input, { paddingRight:48 }, errors.password && s.inputError]}
+              placeholder="••••••••"
+              placeholderTextColor={C.muted}
+              secureTextEntry={!showPass}
+              value={password}
+              onChangeText={t => { setPassword(t); setErrors(e=>({...e,password:undefined})); }}
+              onSubmitEditing={handleLogin}
+              returnKeyType="done"
             />
-            {errors.email && <Text style={s.error}>{errors.email}</Text>}
+            <TouchableOpacity style={s.eye} onPress={()=>setShowPass(v=>!v)} activeOpacity={0.7}>
+              <EyeIcon visible={showPass}/>
+            </TouchableOpacity>
+          </View>
+          {!!errors.password && <Text style={s.errorTxt}>{errors.password}</Text>}
 
-            <Text style={s.label}>CONTRASEÑA</Text>
-            <View style={s.passRow}>
-              <TextInput
-                style={[s.input, { flex: 1 }, errors.password && s.inputError]}
-                placeholder="••••••••"
-                placeholderTextColor="#aaa"
-                value={password}
-                onChangeText={t => { setPassword(t); setErrors(e => ({ ...e, password: null })); }}
-                secureTextEntry={!showPass}
-              />
-              <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPass(!showPass)}>
-                <EyeIcon visible={showPass} size={W * 0.045} color="#888" />
-              </TouchableOpacity>
+          {/* Olvidé contraseña */}
+          <TouchableOpacity
+            style={s.forgotWrap}
+            onPress={() => navigation.navigate('ForgotPassword')}
+            activeOpacity={0.7}>
+            <Text style={s.forgotTxt}>¿Olvidaste tu contraseña?</Text>
+          </TouchableOpacity>
+
+          {/* Error general */}
+          {!!errors.general && (
+            <View style={s.errorBox}>
+              <Text style={s.errorBoxTxt}>⚠️ {errors.general}</Text>
             </View>
-            {errors.password && <Text style={s.error}>{errors.password}</Text>}
-            {errors.general && <Text style={s.error}>{errors.general}</Text>}
-          </Animated.View>
+          )}
 
-          <TouchableOpacity style={s.forgotRow}>
-            <Text style={s.forgotText}>¿Olvidaste tu contraseña?</Text>
+          {/* Login btn */}
+          <TouchableOpacity style={s.btn} onPress={handleLogin} disabled={loading} activeOpacity={0.85}>
+            {loading
+              ? <ActivityIndicator color="#fff"/>
+              : <Text style={s.btnTxt}>Iniciar sesión</Text>
+            }
           </TouchableOpacity>
 
-          <TouchableOpacity style={[s.btnPrimary, loading && s.btnDisabled]} onPress={handleLogin} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.btnPrimaryText}>Iniciar sesión</Text>}
-          </TouchableOpacity>
-
-          <View style={s.dividerRow}>
-            <View style={s.divider} />
-            <Text style={s.dividerText}>o continúa con</Text>
-            <View style={s.divider} />
+          {/* Divider */}
+          <View style={s.divider}>
+            <View style={s.divLine}/>
+            <Text style={s.divTxt}>o continúa con</Text>
+            <View style={s.divLine}/>
           </View>
 
-          <TouchableOpacity style={s.btnGoogle}>
-            <GoogleIcon size={W * 0.05} />
-            <Text style={s.btnGoogleText}>Continuar con Google</Text>
+          {/* Google btn */}
+          <TouchableOpacity style={s.googleBtn} onPress={handleGoogle} disabled={gLoading} activeOpacity={0.85}>
+            {gLoading
+              ? <ActivityIndicator color={C.navy} size="small"/>
+              : <>
+                  <GoogleIcon/>
+                  <Text style={s.googleTxt}>Continuar con Google</Text>
+                </>
+            }
           </TouchableOpacity>
 
-          <TouchableOpacity style={s.registerRow} onPress={() => navigation.navigate('Register')}>
-            <Text style={s.registerText}>
-              ¿Sin cuenta? <Text style={s.registerLink}>Regístrate gratis</Text>
-            </Text>
-          </TouchableOpacity>
-
+          {/* Register link */}
+          <View style={s.registerRow}>
+            <Text style={s.registerTxt}>¿No tienes cuenta? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')} activeOpacity={0.7}>
+              <Text style={[s.registerTxt, s.registerLink]}>Regístrate</Text>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -142,38 +210,34 @@ export default function LoginScreen({ navigation }) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  content: { paddingHorizontal: W * 0.06, paddingTop: H * 0.07, paddingBottom: H * 0.04 },
-  title: { fontSize: W * 0.07, fontWeight: '800', color: '#1A2035', marginBottom: H * 0.005 },
-  subtitle: { fontSize: W * 0.035, color: '#888', marginBottom: H * 0.035 },
-  label: { fontSize: W * 0.025, fontWeight: '700', color: '#888', letterSpacing: 1, marginBottom: H * 0.008 },
-  input: {
-    borderWidth: 1, borderColor: '#E0E0E0', borderRadius: W * 0.025,
-    paddingHorizontal: W * 0.04, paddingVertical: H * 0.016,
-    fontSize: W * 0.038, color: '#1A2035', backgroundColor: '#FAFAFA', marginBottom: H * 0.008,
-  },
-  inputError: { borderColor: '#FF5252' },
-  error: { fontSize: W * 0.03, color: '#FF5252', marginBottom: H * 0.01 },
-  passRow: { flexDirection: 'row', alignItems: 'center' },
-  eyeBtn: { position: 'absolute', right: W * 0.03, padding: 4 },
-  forgotRow: { alignItems: 'flex-end', marginBottom: H * 0.025, marginTop: H * 0.01 },
-  forgotText: { fontSize: W * 0.032, color: '#1A2035', fontWeight: '600' },
-  btnPrimary: {
-    backgroundColor: '#1A2035', paddingVertical: H * 0.018,
-    borderRadius: W * 0.03, alignItems: 'center', marginBottom: H * 0.025,
-  },
-  btnDisabled: { opacity: 0.7 },
-  btnPrimaryText: { color: '#fff', fontSize: W * 0.04, fontWeight: '700' },
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: H * 0.02 },
-  divider: { flex: 1, height: 1, backgroundColor: '#E0E0E0' },
-  dividerText: { fontSize: W * 0.03, color: '#aaa', marginHorizontal: W * 0.03 },
-  btnGoogle: {
-    borderWidth: 1, borderColor: '#E0E0E0', paddingVertical: H * 0.016,
-    borderRadius: W * 0.03, flexDirection: 'row', alignItems: 'center',
-    justifyContent: 'center', gap: W * 0.025, marginBottom: H * 0.03,
-  },
-  btnGoogleText: { fontSize: W * 0.038, color: '#1A2035', fontWeight: '500' },
-  registerRow: { alignItems: 'center' },
-  registerText: { fontSize: W * 0.033, color: '#888' },
-  registerLink: { color: '#1A2035', fontWeight: '800' },
+  content:      { flexGrow:1, paddingHorizontal:space.screen, paddingTop:rv(50), paddingBottom:rv(40) },
+  title:        { fontSize:font.xxl, fontWeight:'900', color:colors.primary, marginBottom:rv(6) },
+  subtitle:     { fontSize:font.md, color:colors.textSecondary, marginBottom:rv(28) },
+  label:        { fontSize:font.sm, fontWeight:'600', color:colors.primary, marginBottom:rv(6) },
+  input:        { borderWidth:1.5, borderColor:colors.border, borderRadius:radius.md,
+                  paddingHorizontal:rv(14), paddingVertical:rv(12),
+                  fontSize:font.md, color:colors.primary, backgroundColor:'#F8FAFF' },
+  inputError:   { borderColor:colors.error },
+  passWrap:     { position:'relative' },
+  eye:          { position:'absolute', right:14, top:'50%', transform:[{translateY:-12}] },
+  errorTxt:     { color:colors.error, fontSize:font.xs, marginTop:4, fontWeight:'600' },
+  forgotWrap:   { alignSelf:'flex-end', marginTop:rv(10) },
+  forgotTxt:    { fontSize:font.sm, color:colors.primary, fontWeight:'600',
+                  textDecorationLine:'underline' },
+  errorBox:     { backgroundColor:'#FFF0F0', borderRadius:radius.md, padding:rv(12),
+                  marginTop:rv(12) },
+  errorBoxTxt:  { color:colors.error, fontSize:font.sm, fontWeight:'600' },
+  btn:          { backgroundColor:colors.primary, borderRadius:radius.lg,
+                  paddingVertical:rv(15), alignItems:'center', marginTop:rv(20) },
+  btnTxt:       { color:'#fff', fontWeight:'800', fontSize:font.md },
+  divider:      { flexDirection:'row', alignItems:'center', gap:10, marginVertical:rv(20) },
+  divLine:      { flex:1, height:1, backgroundColor:colors.border },
+  divTxt:       { fontSize:font.xs, color:colors.textSecondary, fontWeight:'600' },
+  googleBtn:    { flexDirection:'row', alignItems:'center', justifyContent:'center', gap:10,
+                  borderWidth:1.5, borderColor:colors.border, borderRadius:radius.lg,
+                  paddingVertical:rv(13), backgroundColor:'#fff' },
+  googleTxt:    { fontSize:font.md, fontWeight:'700', color:colors.primary },
+  registerRow:  { flexDirection:'row', justifyContent:'center', marginTop:rv(24) },
+  registerTxt:  { fontSize:font.sm, color:colors.textSecondary },
+  registerLink: { color:colors.primary, fontWeight:'700', textDecorationLine:'underline' },
 });
