@@ -3,7 +3,4 @@
 *.zip
 node_modules/
 .env
-api/
-backend/
-frontend/
 timefocus-backend/
