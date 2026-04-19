@@ -1,12 +1,8 @@
-# Carpetas de otras ramas (se manejan en sus propias ramas)
-backend/
-frontend/
-api/
-timefocus-backend/
-
-# Archivos generados
 *.db
 *.log
 *.zip
 node_modules/
 .env
+backend/
+frontend/
+timefocus-backend/
