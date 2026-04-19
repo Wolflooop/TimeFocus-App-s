@@ -1,25 +1,26 @@
 {
-  "name": "timefocus-mobile-backend",
+  "name": "timefocus-backend",
   "version": "1.0.0",
-  "description": "API REST para TimeFocus App Móvil",
-  "main": "index.js",
+  "description": "API REST para TimeFocus – MySQL + JWT + Nodemailer + Google OAuth",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "db:init": "node src/config/initDB.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.1",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "mysql2": "^3.22.0"
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "google-auth-library": "^9.10.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.9.7",
+    "nodemailer": "^6.9.13",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.0"
-  },
-  "type": "commonjs"
+    "nodemon": "^3.1.0"
+  }
 }
