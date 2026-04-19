@@ -1,0 +1,14 @@
+extends ../layouts/base
+
+block content
+  .splash
+    .splash__blob.splash__blob--tl
+    .splash__blob.splash__blob--br
+    .login-modal
+      .login-modal__close
+        a(href='/') ✕
+      h2.login-modal__title Bienvenido
+      h3.login-modal__subtitle Técnica Pomodoro inteligente
+      a.login-modal__btn(href='/dashboard') Inicia sesión ¡Comenzar ya!
+      .login-modal__register
+        a(href='/registro') ¿Sin cuenta? Regístrate gratis

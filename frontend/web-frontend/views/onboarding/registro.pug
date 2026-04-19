@@ -1,0 +1,18 @@
+extends ../layouts/base
+
+block content
+  .splash
+    .splash__blob.splash__blob--tl
+    .splash__blob.splash__blob--br
+    .login-modal
+      .login-modal__close
+        a(href='/login') ✕
+      h2.login-modal__title Crear cuenta
+      h3.login-modal__subtitle Empieza a organizar tu tiempo
+      form(action='/registro' method='POST')
+        input.form-input(type="text" name="nombre" placeholder="Tu nombre" required style="margin-bottom:12px;width:100%;")
+        input.form-input(type="email" name="email" placeholder="Correo electrónico" required style="margin-bottom:12px;width:100%;")
+        input.form-input(type="password" name="password" placeholder="Contraseña" required style="margin-bottom:20px;width:100%;")
+        button.login-modal__btn(type="submit") Registrarse →
+      .login-modal__register
+        a(href='/login') ¿Ya tienes cuenta? Inicia sesión

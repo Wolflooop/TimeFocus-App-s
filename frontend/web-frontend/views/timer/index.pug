@@ -1,0 +1,72 @@
+extends ../layouts/app
+
+block page
+  .page-header
+    a.back-btn(href='/dashboard') ←
+    h1.page-header__title Temporizador
+
+  .timer-page
+    .timer-page__left
+      .card
+        h2.card__title Sesión Vinculada
+        p.timer-linked__name Examen de Matemáticas
+
+      .timer-modes
+        button.timer-mode-btn(data-mode="corto") Corto 5°
+        button.timer-mode-btn.timer-mode-btn--active(data-mode="pomodoro") Pomodoro 25°
+        button.timer-mode-btn(data-mode="largo") Largo 15°
+
+      .timer-circle-wrap
+        .timer-circle
+          .timer-circle__inner
+            p.timer-circle__time#timer-display 18:42
+            p.timer-circle__label Estudiando
+
+      .timer-controls
+        button.btn-secondary#btn-reiniciar Reiniciar
+        button.btn-primary#btn-pausar Pausar
+
+      .timer-sessions
+        span Sesiones completadas hoy
+        .session-dots
+          span.session-dot.session-dot--done
+          span.session-dot.session-dot--done
+          span.session-dot.session-dot--done
+          span.session-dot
+        span.session-count 3/4
+
+    .timer-page__right
+      .card.card--dark.card--timer
+        p.timer__time 18:42
+        .timer__progress
+          .timer__progress-bg
+          .timer__progress-fill
+        p.timer__subject Calculo diferencial
+        p.timer__session Sesión 3 de 4
+
+      h2.card__title Horario de hoy
+      .schedule-list
+        .schedule-item
+          span.schedule-item__time 8:00
+          .schedule-item__bar
+            span Calculo diferencial - Aula 122
+        .schedule-item
+          span.schedule-item__time 9:00
+          .schedule-item__bar
+            span Calculo diferencial
+        .schedule-item
+          span.schedule-item__time 10:00
+          .schedule-item__bar
+            span POO - Lab 3
+        .schedule-item
+          span.schedule-item__time 11:00
+          .schedule-item__bar.schedule-item__bar--yellow
+            span Pomodoro - Estudio
+        .schedule-item
+          span.schedule-item__time 12:00
+          .schedule-item__bar
+            span Base de datos - Lab 5
+        .schedule-item
+          span.schedule-item__time 13:00
+          .schedule-item__bar
+            span Base de datos

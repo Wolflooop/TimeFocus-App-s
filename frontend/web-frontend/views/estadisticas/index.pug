@@ -1,0 +1,62 @@
+extends ../layouts/app
+
+block page
+  .stats-page
+    .stats-page__left
+      h2.card__title Horario
+      .card
+        .schedule-list
+          .schedule-item
+            span.schedule-item__time 8:00
+            .schedule-item__bar
+              span Calculo diferencial - Aula 122
+          .schedule-item
+            span.schedule-item__time 9:00
+            .schedule-item__bar
+              span Calculo diferencial
+          .schedule-item
+            span.schedule-item__time 10:00
+            .schedule-item__bar
+              span POO - Lab 3
+          .schedule-item
+            span.schedule-item__time 11:00
+            .schedule-item__bar.schedule-item__bar--yellow
+              span Pomodoro - Estudio
+          .schedule-item
+            span.schedule-item__time 12:00
+            .schedule-item__bar
+              span Base de datos - Lab 5
+          .schedule-item
+            span.schedule-item__time 13:00
+            .schedule-item__bar
+              span Base de datos
+
+    .stats-page__right
+      h2.card__title Correlación de hábitos
+      .card.card--stats
+        h3.stats-section__title Hora de estudio vs Calificaciones
+        .habits-bars
+          .habits-bar-row
+            span.habits-bar__label Sem1
+            span.habits-bar__value 28h - 9.1
+            .habits-bar__track
+              .habits-bar__fill(style="width:88%")
+          .habits-bar-row
+            span.habits-bar__label Sem2
+            span.habits-bar__value 24h - 8.4
+            .habits-bar__track
+              .habits-bar__fill(style="width:73%")
+          .habits-bar-row
+            span.habits-bar__label Sem3
+            span.habits-bar__value 18h - 7.3
+            .habits-bar__track
+              .habits-bar__fill(style="width:56%")
+          .habits-bar-row
+            span.habits-bar__label Sem4
+            span.habits-bar__value 12h - 6.5
+            .habits-bar__track
+              .habits-bar__fill(style="width:30%")
+
+        h3.stats-section__title Horas pico de distracción
+        .heatmap-placeholder
+          p (Mapa de calor)

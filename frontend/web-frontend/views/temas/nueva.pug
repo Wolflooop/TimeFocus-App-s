@@ -1,0 +1,49 @@
+extends ../layouts/app
+
+block page
+  .page-header
+    a.back-btn(href='/temas') ←
+    h1.page-header__title Nuevo Tema
+
+  form.form-card(action='/temas' method='POST')
+
+    .form-field
+      label.form-label Nombre del tema
+      input.form-input(type="text" id="nombre" name="nombre" placeholder="Ej. Cálculo Diferencial" required)
+
+    .form-field
+      label.form-label Nombre del profesor
+      input.form-input(type="text" id="profesor" name="profesor" placeholder="Ej. Prof. Martínez" required)
+
+    .form-field
+      label.form-label Color identificador
+      .color-picker#colorPicker
+        each color in ['#1976d2','#4caf50','#f5c518','#f44336','#9c27b0','#ff9800','#00bcd4','#e91e63']
+          .color-opt(style=`background:${color}` data-color=color class=color === '#1976d2' ? 'selected' : '')
+      input(type="hidden" name="color" id="color-val" value="#1976d2")
+
+    .form-field
+      label.form-label Número de tareas
+      input.form-input(type="number" id="tareas" name="tareas" placeholder="Ej. 12" min="0")
+
+    .form-footer
+      button.btn-primary(type="submit") Crear tema →
+      a.btn-cancel(href='/temas') Cancelar
+
+  style.
+    .color-picker { display: flex; gap: 12px; flex-wrap: wrap; }
+    .color-opt { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s, border-color 0.2s; }
+    .color-opt:hover { transform: scale(1.15); }
+    .color-opt.selected { border-color: #1a2f4e; transform: scale(1.15); }
+    .btn-cancel { background: transparent; color: #666; font-size: 16px; padding: 14px 32px; border-radius: 100px; border: 1px solid #ddd; cursor: pointer; text-decoration: none; display: flex; align-items: center; }
+    .btn-cancel:hover { border-color: #999; color: #1a1a2e; }
+
+  script.
+    document.querySelectorAll('.color-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        const hidden = document.getElementById('color-val');
+        if (hidden) hidden.value = opt.dataset.color;
+      });
+    });
