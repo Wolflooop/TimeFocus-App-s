@@ -10,3 +10,4 @@ android/.gradle/
 android/build/
 android/app/build/
 *.hprof
+android/gradle/wrapper/gradle-wrapper.jar
