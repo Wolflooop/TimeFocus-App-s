@@ -1,6 +1,4 @@
 node_modules/
 .env
-.env.*
-!.env.example
-src/public/css/output.css
 *.log
+src/public/css/output.css
