@@ -1,52 +1,32 @@
-require('dotenv').config();
+// index.js
 const express = require('express');
 const cors    = require('cors');
-const app     = express();
-const PORT    = process.env.PORT || 3001;
+require('dotenv').config();
 
-// Middlewares
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
-app.use(express.json());
+const app = express();
+
+app.use(cors({ origin: '*' }));
+app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas
-app.use('/api/auth',     require('./src/routes/auth'));
-app.use('/api/tareas',   require('./src/routes/tareas'));
-app.use('/api/sesiones', require('./src/routes/sesiones'));
-app.use('/api/horarios', require('./src/routes/horarios'));
-app.use('/api/stats',    require('./src/routes/stats'));
+app.use('/api/auth',          require('./src/routes/auth'));
+app.use('/api/tasks',         require('./src/routes/tasks'));
+app.use('/api/sessions',      require('./src/routes/sessions'));
+app.use('/api/schedule',      require('./src/routes/schedule'));
+app.use('/api/notifications', require('./src/routes/notifications'));
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', proyecto: 'TimeFocus Web Backend', version: '1.0.0' });
-});
+app.get('/api/health', (req, res) => res.json({ ok: true, ts: new Date() }));
+app.get('/', (req, res) => res.json({ mensaje: 'TimeFocus API corriendo ✅' }));
 
-// 404
-app.use((req, res) => {
-  res.status(404).json({ error: 'Ruta no encontrada' });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
+app.use((req, res) => res.status(404).json({ error: `Ruta no encontrada: ${req.method} ${req.path}` }));
+app.use((err, req, res, _next) => {
+  console.error('[Error]', err.message);
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ TimeFocus Web Backend corriendo en http://localhost:${PORT}`);
-  console.log(`📋 Endpoints disponibles:`);
-  console.log(`   POST /api/auth/registro`);
-  console.log(`   POST /api/auth/login`);
-  console.log(`   GET  /api/auth/perfil`);
-  console.log(`   GET  /api/tareas`);
-  console.log(`   POST /api/tareas`);
-  console.log(`   PUT  /api/tareas/:id`);
-  console.log(`   DELETE /api/tareas/:id`);
-  console.log(`   GET  /api/sesiones`);
-  console.log(`   POST /api/sesiones`);
-  console.log(`   GET  /api/horarios`);
-  console.log(`   POST /api/horarios`);
-  console.log(`   GET  /api/stats/resumen`);
-  console.log(`   GET  /api/stats/calificaciones`);
-  console.log(`   GET  /api/stats/tareas-vencidas`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n🍅 TimeFocus API en puerto ${PORT}`);
+  console.log(`   http://localhost:${PORT}/api/health\n`);
 });

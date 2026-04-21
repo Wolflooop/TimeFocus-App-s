@@ -1,9 +1,14 @@
+// src/routes/auth.js
 const router = require('express').Router();
-const { registro, login, perfil } = require('../controllers/authController');
-const { verificarToken } = require('../middlewares/auth');
+const ctrl   = require('../controllers/authController');
+const auth   = require('../middlewares/auth');
 
-router.post('/registro', registro);
-router.post('/login',    login);
-router.get('/perfil',    verificarToken, perfil);
+router.post('/login',             ctrl.login);
+router.post('/register',          ctrl.register);
+router.post('/google',            ctrl.googleSignIn);
+router.post('/forgot-password',   ctrl.forgotPassword);
+router.post('/verify-reset-code', ctrl.verifyResetCode);
+router.post('/reset-password',    ctrl.resetPassword);
+router.get ('/me',         auth,  ctrl.me);
 
 module.exports = router;
