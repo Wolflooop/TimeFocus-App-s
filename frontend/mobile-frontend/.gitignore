@@ -6,3 +6,7 @@ android/.cxx/
 android/app/build/
 *.keystore
 !debug.keystore
+android/.gradle/
+android/build/
+android/app/build/
+*.hprof
