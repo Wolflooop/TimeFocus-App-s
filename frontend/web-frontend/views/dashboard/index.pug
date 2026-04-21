@@ -1,0 +1,60 @@
+extends ../layouts/app
+
+block page
+  .page-header
+    .page-header__left
+      h1.page-header__greeting Hola, J osue 
+      p.page-header__date= fecha || 'Domingo 22 de Marzo 2026'
+
+  .dashboard-grid
+    //- Tarjeta Timer activo
+    .card.card--dark.card--timer
+      p.timer__time 18:42
+      .timer__progress
+        .timer__progress-bg
+        .timer__progress-fill
+      p.timer__subject Calculo diferencial
+      p.timer__session Sesión 3 de 4
+
+    //- Stats rápidas
+    .stats-row
+      .stat-card
+        p.stat-card__value 4.2 h
+        p.stat-card__label Hoy
+      .stat-card
+        p.stat-card__value.stat-card__value--green 7
+        p.stat-card__label Tareas
+      .stat-card
+        p.stat-card__value.stat-card__value--yellow 3
+        p.stat-card__label Pendientes
+
+    //- Tareas de hoy
+    .card.card--tasks
+      h2.card__title Tareas de hoy
+      ul.task-list
+        li.task-list__item
+          input.task-list__check(type="checkbox" checked)
+          span Ejercicio cap 5
+          .task-badge.task-badge--done Hecho
+        li.task-list__item
+          input.task-list__check(type="checkbox")
+          span Proyecto POO
+          .task-badge.task-badge--course Curso
+        li.task-list__item.task-list__item--urgent
+          input.task-list__check(type="checkbox")
+          span Entrega reporte
+          .task-badge.task-badge--urgent Urgente
+
+    //- Activity Stream
+    .card.card--activity
+      h2.card__title Activity Stream
+      ul.activity-list
+        li.activity-list__item
+          .activity-list__dot.activity-list__dot--green
+          span Calculo diferencial
+        li.activity-list__item
+          .activity-list__dot.activity-list__dot--red
+          span Base de datos
+        li.activity-list__item
+          .activity-list__dot.activity-list__dot--gray
+          span Metricas 

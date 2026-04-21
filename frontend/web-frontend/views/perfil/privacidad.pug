@@ -1,0 +1,157 @@
+extends ../layouts/app
+
+block page
+  .page-header
+    a.back-btn(href='/perfil') ←
+    h1.page-header__title Privacidad de Datos
+
+  .form-card
+
+    .form-field
+      label.form-label Visibilidad del perfil
+      .toggle-row
+        span Perfil público
+        label.toggle
+          input(type="checkbox" id="perfil-publico")
+          span.toggle__slider
+
+    .form-field
+      label.form-label Compartir estadísticas
+      .toggle-row
+        span Compartir mis estadísticas de estudio
+        label.toggle
+          input(type="checkbox" id="compartir-stats")
+          span.toggle__slider
+
+    .form-field
+      label.form-label Historial de actividad
+      .toggle-row
+        span Guardar historial de sesiones
+        label.toggle
+          input(type="checkbox" id="historial" checked)
+          span.toggle__slider
+
+    .form-field
+      label.form-label Datos de uso
+      .toggle-row
+        span Enviar datos anónimos para mejorar la app
+        label.toggle
+          input(type="checkbox" id="datos-uso" checked)
+          span.toggle__slider
+
+    .form-field
+      label.form-label Zona peligrosa
+      .danger-box
+        .danger-item
+          .danger-item__info
+            p.danger-item__title Eliminar historial
+            p.danger-item__desc Borra todo tu historial de sesiones y actividad
+          button.btn-danger(type="button" onclick="eliminarHistorial()") Eliminar
+        .danger-item
+          .danger-item__info
+            p.danger-item__title Eliminar cuenta
+            p.danger-item__desc Elimina permanentemente tu cuenta y todos tus datos
+          button.btn-danger(type="button" onclick="eliminarCuenta()") Eliminar
+
+    .form-footer
+      button.btn-primary(type="button" onclick="guardarPrivacidad()") Guardar cambios →
+      a.btn-cancel(href='/perfil') Cancelar
+
+  style.
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 15px;
+      color: #1a1a2e;
+    }
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle__slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: #ccc;
+      border-radius: 26px;
+      transition: 0.3s;
+    }
+    .toggle__slider:before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    .toggle input:checked + .toggle__slider { background: #1976d2; }
+    .toggle input:checked + .toggle__slider:before { transform: translateX(22px); }
+
+    .danger-box {
+      background: #fff5f5;
+      border: 1px solid #ffcdd2;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .danger-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #ffcdd2;
+    }
+    .danger-item:last-child { border-bottom: none; }
+    .danger-item__title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+    .danger-item__desc {
+      font-size: 13px;
+      color: #666;
+    }
+    .btn-danger {
+      background: transparent;
+      color: #e53935;
+      border: 1px solid #e53935;
+      border-radius: 100px;
+      padding: 8px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-danger:hover { background: #e53935; color: white; }
+
+  script.
+    function guardarPrivacidad() {
+      alert('Privacidad actualizada correctamente ✅');
+      window.location.href = '/perfil';
+    }
+
+    function eliminarHistorial() {
+      if (confirm('¿Estás seguro de que deseas eliminar tu historial? Esta acción no se puede deshacer.')) {
+        alert('Historial eliminado ✅');
+      }
+    }
+
+    function eliminarCuenta() {
+      if (confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es permanente.')) {
+        alert('Cuenta eliminada. Hasta pronto 👋');
+        window.location.href = '/';
+      }
+    }

@@ -1,0 +1,69 @@
+extends ../layouts/app
+
+block page
+  .page-header
+    h1.page-header__title Tareas
+    .filter-tabs
+      a.filter-tab.filter-tab--active(href='?filtro=todas') Todas
+      a.filter-tab(href='?filtro=hoy') Hoy
+      a.filter-tab(href='?filtro=semana') Semana
+      a.filter-tab(href='?filtro=pendientes') Pendientes
+
+  .tareas-list
+    //- URGENTE
+    .tareas-section
+      .tareas-section__label.tareas-section__label--urgent
+        .tareas-section__bar
+        span URGENTE
+      .card
+        .tarea-item
+          .tarea-item__thumb.tarea-item__thumb--urgent
+          .tarea-item__info
+            p.tarea-item__name Entrega reporte de BD
+            p.tarea-item__sub Base de datos · vence hoy
+          .tarea-item__progress
+            .progress-bar
+              .progress-bar__fill(style="width: 86%")
+
+    //- EN CURSO
+    .tareas-section
+      .tareas-section__label.tareas-section__label--course
+        .tareas-section__bar
+        span EN CURSO
+      .card
+        .tarea-item
+          .tarea-item__thumb.tarea-item__thumb--blue
+          .tarea-item__info
+            p.tarea-item__name Proyecto POO - Fase 2
+            p.tarea-item__sub Programación · 22 feb
+          .tarea-item__progress
+            .progress-bar
+              .progress-bar__fill(style="width: 87%")
+        .tarea-item
+          .tarea-item__thumb.tarea-item__thumb--blue
+          .tarea-item__info
+            p.tarea-item__name Examen matemáticas
+            p.tarea-item__sub Cálculo · 25 feb
+          .tarea-item__progress
+            .progress-bar
+              .progress-bar__fill(style="width: 87%")
+
+    //- PENDIENTE
+    .tareas-section
+      .tareas-section__label
+        .tareas-section__bar
+        span PENDIENTE
+      .card
+        .tarea-item
+          .tarea-item__thumb
+          .tarea-item__info
+            p.tarea-item__name Práctica de laboratorio
+            p.tarea-item__sub Física · sin fecha
+        .tarea-item
+          .tarea-item__thumb
+          .tarea-item__info
+            p.tarea-item__name Lectura Ética
+            p.tarea-item__sub Humanidades · 28 feb
+
+  .fab-container
+    a.fab(href='/tareas/nueva') + Nueva Tarea

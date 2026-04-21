@@ -1,0 +1,24 @@
+extends ../layouts/base
+
+block content
+  .splash
+    .splash__blob.splash__blob--tl
+    .splash__blob.splash__blob--br
+    .login-modal
+      .login-modal__close
+        a(href='/') ✕
+      h2.login-modal__title Bienvenido
+      h3.login-modal__subtitle Técnica Pomodoro inteligente
+
+      if error
+        p.error-msg= error
+
+      form(action='/login' method='POST')
+        .form-field
+          input.form-input(type='email' name='email' placeholder='Correo electrónico' required)
+        .form-field
+          input.form-input(type='password' name='password' placeholder='Contraseña' required)
+        button.login-modal__btn(type='submit') Inicia sesión →
+
+      .login-modal__register
+        a(href='/registro') ¿Sin cuenta? Regístrate gratis

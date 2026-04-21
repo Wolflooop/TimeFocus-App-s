@@ -1,0 +1,20 @@
+extends ../layouts/base
+
+block content
+  .splash
+    .splash__blob.splash__blob--tl
+    .splash__blob.splash__blob--br
+    .splash__logo-box
+      svg.splash__logo-icon(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+        circle(cx="12" cy="12" r="10")
+        polyline(points="12 6 12 12 16 14")
+    .splash__brand
+      h1.splash__title
+        span Time
+        span.splash__title--accent Focus
+    .splash__dots
+      span.splash__dot.splash__dot--active
+      span.splash__dot
+      span.splash__dot
+    p.splash__subtitle PRODUCTIVIDAD ACADÉMICA
+    p.splash__version v 1.0.0

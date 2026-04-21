@@ -1,0 +1,29 @@
+extends ../layouts/base
+
+block content
+  .splash
+    .splash__blob.splash__blob--tl
+    .splash__blob.splash__blob--br
+    .login-modal
+      .login-modal__close
+        a(href='/login') ✕
+      h2.login-modal__title Crear cuenta
+      h3.login-modal__subtitle Únete a TimeFocus
+
+      if error
+        p.error-msg= error
+
+      form#formRegistro(action='/registro' method='POST')
+        .form-field
+          input.form-input(type='text' name='nombre' placeholder='Nombre' required)
+        .form-field
+          input.form-input(type='text' name='apellido_paterno' placeholder='Apellido paterno' required)
+        .form-field
+          input.form-input(type='email' name='email' placeholder='Correo electrónico' required)
+        .form-field
+          input.form-input(type='password' name='password' placeholder='Contraseña' required)
+
+        button.login-modal__btn(type='submit') Crear cuenta →
+
+      .login-modal__register
+        a(href='/login') ¿Ya tienes cuenta? Inicia sesión

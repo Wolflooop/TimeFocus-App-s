@@ -1,0 +1,37 @@
+extends ../layouts/app
+
+block page
+  .perfil-page
+    .card.perfil-hero
+      .perfil-avatar A
+      .perfil-info
+        h2.perfil-info__name Josue Oloarte
+        p.perfil-info__role Desarrollador de Software
+
+    .perfil-stats
+      .stat-card
+        p.stat-card__value 8.7
+        p.stat-card__label Promedio
+      .stat-card
+        p.stat-card__value 4.5h
+        p.stat-card__label Promedio
+      .stat-card
+        p.stat-card__value 24
+        p.stat-card__label Total
+
+    .perfil-menu
+      a.perfil-menu__item(href='/perfil/info')
+        span Mi información
+        span →
+      a.perfil-menu__item(href='/perfil/metas')
+        span Metas de estudio
+        span →
+      a.perfil-menu__item(href='/perfil/notificaciones')
+        span Notificaciones
+        span →
+      a.perfil-menu__item(href='/perfil/privacidad')
+        span Privacidad de datos
+        span →
+      a.perfil-menu__item.perfil-menu__item--danger(href='/logout')
+        span Cerrar sesión
+        span →

@@ -4,4 +4,7 @@
 node_modules/
 .env
 timefocus-backend/
-frontend/web-frontend/
+api/
+frontend/mobile-frontend/
+web-completo/
+web-backend/

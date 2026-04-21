@@ -1,0 +1,51 @@
+extends ../layouts/app
+
+block page
+  .page-header
+    .page-header__left
+      a.back-btn(href='/tareas') ←
+      h1.page-header__title Nueva tarea
+
+  form(action='/tareas' method='POST')
+    .form-card
+
+      .form-field
+        label.form-label Título
+        input.form-input(type="text" name="titulo" placeholder="Ej. Examen de Matemáticas" required)
+
+      .form-field
+        label.form-label Materia
+        select.form-input(name="materia")
+          option(value="" disabled selected) Selecciona una materia
+          option(value="calculo") Cálculo diferencial
+          option(value="poo") Programación OO
+          option(value="bd") Base de datos
+          option(value="fisica") Física General
+          option(value="etica") Ética Profesional
+
+      .form-field
+        label.form-label Fecha de entrega
+        input.form-input(type="date" name="fecha")
+
+      .form-field
+        label.form-label Prioridad
+        .form-pills-row
+          button.form-pill(type="button" data-group="prioridad" value="alta") Alta
+          button.form-pill.form-pill--active(type="button" data-group="prioridad" value="media") Media
+          button.form-pill(type="button" data-group="prioridad" value="baja") Baja
+        input(type="hidden" name="prioridad" id="prioridad-val" value="media")
+
+      .form-field
+        label.form-label Estado inicial
+        .form-pills-row
+          button.form-pill.form-pill--active(type="button" data-group="estado" value="pendiente") Pendiente
+          button.form-pill(type="button" data-group="estado" value="en_curso") En curso
+          button.form-pill(type="button" data-group="estado" value="hecha") Hecha
+        input(type="hidden" name="estado" id="estado-val" value="pendiente")
+
+      .form-field
+        label.form-label Notas
+        textarea.form-textarea(name="notas" rows="3" placeholder="Agrega notas opcionales...")
+
+    .form-footer
+      button.btn-primary(type="submit") Crear tarea →
