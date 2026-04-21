@@ -5,29 +5,28 @@ block page
     a.back-btn(href='/temas') ←
     h1.page-header__title Nuevo Tema
 
-  form.form-card(action='/temas' method='POST')
+  .form-card
 
     .form-field
       label.form-label Nombre del tema
-      input.form-input(type="text" id="nombre" name="nombre" placeholder="Ej. Cálculo Diferencial" required)
+      input.form-input(type="text" id="nombre" name="nombre" placeholder="Ej. Cálculo Diferencial")
 
     .form-field
       label.form-label Nombre del profesor
-      input.form-input(type="text" id="profesor" name="profesor" placeholder="Ej. Prof. Martínez" required)
+      input.form-input(type="text" id="profesor" name="profesor" placeholder="Ej. Prof. Martínez")
 
     .form-field
       label.form-label Color identificador
       .color-picker#colorPicker
         each color in ['#1976d2','#4caf50','#f5c518','#f44336','#9c27b0','#ff9800','#00bcd4','#e91e63']
           .color-opt(style=`background:${color}` data-color=color class=color === '#1976d2' ? 'selected' : '')
-      input(type="hidden" name="color" id="color-val" value="#1976d2")
 
     .form-field
       label.form-label Número de tareas
       input.form-input(type="number" id="tareas" name="tareas" placeholder="Ej. 12" min="0")
 
     .form-footer
-      button.btn-primary(type="submit") Crear tema →
+      button.btn-primary(type="button" onclick="guardarTema()") Crear tema →
       a.btn-cancel(href='/temas') Cancelar
 
   style.
@@ -43,7 +42,20 @@ block page
       opt.addEventListener('click', () => {
         document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'));
         opt.classList.add('selected');
-        const hidden = document.getElementById('color-val');
-        if (hidden) hidden.value = opt.dataset.color;
       });
     });
+
+    function guardarTema() {
+      const nombre   = document.getElementById('nombre').value.trim();
+      const profesor = document.getElementById('profesor').value.trim();
+      const tareas   = document.getElementById('tareas').value;
+      const color    = document.querySelector('.color-opt.selected')?.dataset.color || '#1976d2';
+
+      if (!nombre || !profesor) {
+        alert('Por favor completa el nombre del tema y el profesor.');
+        return;
+      }
+
+      alert(`Tema "${nombre}" creado correctamente ✅`);
+      window.location.href = '/temas';
+    }

@@ -1,0 +1,61 @@
+extends ../layouts/app
+
+block page
+  .page-header
+    a.back-btn(href='/perfil') ←
+    h1.page-header__title Metas de Estudio
+
+  .form-card
+
+    .form-field
+      label.form-label Promedio objetivo
+      input.form-input(type="number" id="promedio" name="promedio" placeholder="Ej. 9.0" min="0" max="10" step="0.1")
+
+    .form-field
+      label.form-label Horas de estudio diarias
+      input.form-input(type="number" id="horas" name="horas" placeholder="Ej. 4" min="1" max="24")
+
+    .form-field
+      label.form-label Días de estudio por semana
+      .form-pills-row
+        each dia in ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+          button.form-pill(type="button" data-dia=dia)= dia
+
+    .form-field
+      label.form-label Meta principal
+      input.form-input(type="text" id="meta" name="meta" placeholder="Ej. Aprobar todos los parciales")
+
+    .form-field
+      label.form-label Fecha límite
+      input.form-input(type="date" id="fecha" name="fecha")
+
+    .form-field
+      label.form-label Notas adicionales
+      textarea.form-textarea(id="notas" name="notas" rows="3" placeholder="Escribe aquí tus notas...")
+
+    .form-footer
+      button.btn-primary(type="button" onclick="guardarMetas()") Guardar metas →
+      a.btn-cancel(href='/perfil') Cancelar
+
+  script.
+    // Selección de días
+    document.querySelectorAll('.form-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        pill.classList.toggle('form-pill--active');
+      });
+    });
+
+    function guardarMetas() {
+      const promedio = document.getElementById('promedio').value;
+      const horas    = document.getElementById('horas').value;
+      const meta     = document.getElementById('meta').value.trim();
+      const fecha    = document.getElementById('fecha').value;
+
+      if (!promedio || !horas || !meta) {
+        alert('Por favor completa los campos obligatorios.');
+        return;
+      }
+
+      alert('Metas guardadas correctamente ✅');
+      window.location.href = '/perfil';
+    }

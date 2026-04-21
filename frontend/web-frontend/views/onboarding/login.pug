@@ -9,6 +9,16 @@ block content
         a(href='/') ✕
       h2.login-modal__title Bienvenido
       h3.login-modal__subtitle Técnica Pomodoro inteligente
-      a.login-modal__btn(href='/dashboard') Inicia sesión ¡Comenzar ya!
+
+      if error
+        p.error-msg= error
+
+      form(action='/login' method='POST')
+        .form-field
+          input.form-input(type='email' name='email' placeholder='Correo electrónico' required)
+        .form-field
+          input.form-input(type='password' name='password' placeholder='Contraseña' required)
+        button.login-modal__btn(type='submit') Inicia sesión →
+
       .login-modal__register
         a(href='/registro') ¿Sin cuenta? Regístrate gratis

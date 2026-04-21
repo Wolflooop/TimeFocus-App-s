@@ -1,0 +1,104 @@
+extends ../layouts/app
+
+block page
+  .page-header
+    a.back-btn(href='/perfil') ←
+    h1.page-header__title Notificaciones
+
+  .form-card
+
+    .form-field
+      label.form-label Notificaciones generales
+      .toggle-row
+        span Activar notificaciones
+        label.toggle
+          input(type="checkbox" id="notif-general" checked)
+          span.toggle__slider
+
+    .form-field
+      label.form-label Recordatorios de tareas
+      .toggle-row
+        span Recordarme cuando una tarea vence hoy
+        label.toggle
+          input(type="checkbox" id="notif-tareas" checked)
+          span.toggle__slider
+
+    .form-field
+      label.form-label Recordatorios de estudio
+      .toggle-row
+        span Recordarme iniciar sesión de estudio
+        label.toggle
+          input(type="checkbox" id="notif-estudio")
+          span.toggle__slider
+
+    .form-field
+      label.form-label Hora de recordatorio diario
+      input.form-input(type="time" id="hora" name="hora" value="08:00")
+
+    .form-field
+      label.form-label Resumen semanal
+      .toggle-row
+        span Recibir resumen de productividad cada semana
+        label.toggle
+          input(type="checkbox" id="notif-semanal" checked)
+          span.toggle__slider
+
+    .form-field
+      label.form-label Sonido de notificaciones
+      .toggle-row
+        span Activar sonido al terminar sesión Pomodoro
+        label.toggle
+          input(type="checkbox" id="notif-sonido" checked)
+          span.toggle__slider
+
+    .form-footer
+      button.btn-primary(type="button" onclick="guardarNotif()") Guardar cambios →
+      a.btn-cancel(href='/perfil') Cancelar
+
+  style.
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 15px;
+      color: #1a1a2e;
+    }
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle__slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: #ccc;
+      border-radius: 26px;
+      transition: 0.3s;
+    }
+    .toggle__slider:before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    .toggle input:checked + .toggle__slider { background: #1976d2; }
+    .toggle input:checked + .toggle__slider:before { transform: translateX(22px); }
+
+  script.
+    function guardarNotif() {
+      alert('Notificaciones guardadas correctamente ✅');
+      window.location.href = '/perfil';
+    }
