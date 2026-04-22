@@ -4,13 +4,9 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
+import ENV from '../config/env';
 
-// ── Cambia esta IP a la IP de tu PC en la red local ──────────────
-// En Windows: ipconfig | busca "Dirección IPv4"
-// En Mac/Linux: ifconfig | busca "inet"
-export const API_IP   = '192.168.0.106';   // ← CAMBIA ESTO
-export const API_PORT = '3000';
-export const API_URL  = `http://${API_IP}:${API_PORT}/api`;
+export const API_URL = ENV.API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
