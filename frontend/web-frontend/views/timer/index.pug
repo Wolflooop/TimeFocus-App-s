@@ -8,65 +8,182 @@ block page
   .timer-page
     .timer-page__left
       .card
-        h2.card__title Sesión Vinculada
-        p.timer-linked__name Examen de Matemáticas
+        h2.card__title Sesión vinculada
+        select.form-input#timer-materia(style='margin-top:8px')
+          option(value='') Sin materia
+          if tareas && tareas.length > 0
+            each tarea in tareas
+              option(value=tarea.materia || tarea.titulo)= tarea.titulo
 
       .timer-modes
-        button.timer-mode-btn(data-mode="corto") Corto 5°
-        button.timer-mode-btn.timer-mode-btn--active(data-mode="pomodoro") Pomodoro 25°
-        button.timer-mode-btn(data-mode="largo") Largo 15°
+        button.timer-mode-btn(data-mode='corto') Corto 5°
+        button.timer-mode-btn.timer-mode-btn--active(data-mode='pomodoro') Pomodoro 25°
+        button.timer-mode-btn(data-mode='largo') Largo 15°
 
       .timer-circle-wrap
         .timer-circle
           .timer-circle__inner
-            p.timer-circle__time#timer-display 18:42
-            p.timer-circle__label Estudiando
+            p.timer-circle__time#timer-display 25:00
+            p.timer-circle__label#timer-label Listo para empezar
 
       .timer-controls
         button.btn-secondary#btn-reiniciar Reiniciar
-        button.btn-primary#btn-pausar Pausar
+        button.btn-primary#btn-pausar Iniciar
 
       .timer-sessions
         span Sesiones completadas hoy
-        .session-dots
-          span.session-dot.session-dot--done
-          span.session-dot.session-dot--done
-          span.session-dot.session-dot--done
+        .session-dots#session-dots
           span.session-dot
-        span.session-count 3/4
+          span.session-dot
+          span.session-dot
+          span.session-dot
+        span.session-count#session-count 0/4
+
+      #timer-msg(style='text-align:center;color:#4caf50;font-size:14px;min-height:20px;margin-top:8px')
 
     .timer-page__right
       .card.card--dark.card--timer
-        p.timer__time 18:42
+        p.timer__time#timer-display-2 25:00
         .timer__progress
           .timer__progress-bg
-          .timer__progress-fill
-        p.timer__subject Calculo diferencial
-        p.timer__session Sesión 3 de 4
+          .timer__progress-fill#timer-progress-fill
+        p.timer__subject#timer-subject-label Técnica Pomodoro
+        p.timer__session#timer-session-label Sesión lista
 
-      h2.card__title Horario de hoy
+      h2.card__title(style='margin-top:24px') Sobre el Pomodoro
       .schedule-list
         .schedule-item
-          span.schedule-item__time 8:00
+          span.schedule-item__time 25°
           .schedule-item__bar
-            span Calculo diferencial - Aula 122
+            span Estudio concentrado
         .schedule-item
-          span.schedule-item__time 9:00
-          .schedule-item__bar
-            span Calculo diferencial
-        .schedule-item
-          span.schedule-item__time 10:00
-          .schedule-item__bar
-            span POO - Lab 3
-        .schedule-item
-          span.schedule-item__time 11:00
+          span.schedule-item__time 5°
           .schedule-item__bar.schedule-item__bar--yellow
-            span Pomodoro - Estudio
+            span Descanso corto
         .schedule-item
-          span.schedule-item__time 12:00
-          .schedule-item__bar
-            span Base de datos - Lab 5
-        .schedule-item
-          span.schedule-item__time 13:00
-          .schedule-item__bar
-            span Base de datos
+          span.schedule-item__time 15°
+          .schedule-item__bar.schedule-item__bar--yellow
+            span Descanso largo (cada 4 sesiones)
+
+  script.
+    const DURACIONES = { pomodoro: 25 * 60, corto: 5 * 60, largo: 15 * 60 };
+    const TIPOS      = { pomodoro: 'estudio', corto: 'descanso_corto', largo: 'descanso_largo' };
+
+    let duracion    = DURACIONES.pomodoro;
+    let tipoActual  = 'estudio';
+    let restante    = duracion;
+    let corriendo   = false;
+    let intervalo   = null;
+    let sesionesHoy = 0;
+
+    const display   = document.getElementById('timer-display');
+    const display2  = document.getElementById('timer-display-2');
+    const label     = document.getElementById('timer-label');
+    const sesLabel  = document.getElementById('timer-session-label');
+    const subjLabel = document.getElementById('timer-subject-label');
+    const fill      = document.getElementById('timer-progress-fill');
+    const btnP      = document.getElementById('btn-pausar');
+    const btnR      = document.getElementById('btn-reiniciar');
+    const msg       = document.getElementById('timer-msg');
+    const dots      = document.getElementById('session-dots');
+    const count     = document.getElementById('session-count');
+
+    const render = () => {
+      const m   = String(Math.floor(restante / 60)).padStart(2, '0');
+      const s   = String(restante % 60).padStart(2, '0');
+      const txt = `${m}:${s}`;
+      if (display)  display.textContent  = txt;
+      if (display2) display2.textContent = txt;
+      const pct = ((duracion - restante) / duracion) * 100;
+      if (fill) fill.style.width = pct + '%';
+    };
+
+    const actualizarDots = () => {
+      const dotEls = dots?.querySelectorAll('.session-dot');
+      dotEls?.forEach((d, i) => d.classList.toggle('session-dot--done', i < sesionesHoy % 4));
+      if (count) count.textContent = `${sesionesHoy % 4}/4`;
+    };
+
+    const guardarSesion = async (dur) => {
+      try {
+        const now    = new Date();
+        const inicio = new Date(now.getTime() - dur * 1000);
+        const fmt    = d => d.toTimeString().substring(0, 8);
+        const mat    = document.getElementById('timer-materia')?.value || null;
+        await fetch('/timer/sesion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fecha:            now.toISOString().substring(0, 10),
+            hora_inicio:      fmt(inicio),
+            hora_fin:         fmt(now),
+            duracion_minutos: Math.round(dur / 60),
+            tipo:             tipoActual,
+            materia:          mat,
+          })
+        });
+        if (msg) {
+          msg.textContent = tipoActual === 'estudio' ? '✅ Sesión guardada' : '☕ Descanso registrado';
+          setTimeout(() => { if (msg) msg.textContent = ''; }, 3000);
+        }
+      } catch (e) { console.error('Error guardando sesión:', e); }
+    };
+
+    const iniciar = () => {
+      corriendo = true;
+      if (btnP)  btnP.textContent  = 'Pausar';
+      if (label) label.textContent = tipoActual === 'estudio' ? 'Estudiando...' : 'Descansando...';
+      const mat = document.getElementById('timer-materia')?.options[document.getElementById('timer-materia')?.selectedIndex]?.text || 'Sesión';
+      if (subjLabel) subjLabel.textContent = mat;
+      if (sesLabel)  sesLabel.textContent  = `Sesión ${sesionesHoy + 1}`;
+      intervalo = setInterval(() => {
+        if (restante > 0) {
+          restante--;
+          render();
+        } else {
+          clearInterval(intervalo);
+          corriendo = false;
+          if (btnP)  btnP.textContent  = 'Iniciar';
+          if (label) label.textContent = '¡Completado! 🎉';
+          guardarSesion(duracion);
+          if (tipoActual === 'estudio') sesionesHoy++;
+          actualizarDots();
+          if ('Notification' in window && Notification.permission === 'granted')
+            new Notification('¡Sesión completada! 🍅', { body: tipoActual === 'estudio' ? 'Tómate un descanso.' : '¡Vuelve al estudio!' });
+        }
+      }, 1000);
+    };
+
+    const pausar = () => {
+      clearInterval(intervalo);
+      corriendo = false;
+      if (btnP)  btnP.textContent  = 'Reanudar';
+      if (label) label.textContent = 'Pausado';
+    };
+
+    btnP?.addEventListener('click', () => corriendo ? pausar() : iniciar());
+    btnR?.addEventListener('click', () => {
+      clearInterval(intervalo);
+      corriendo = false; restante = duracion; render();
+      if (btnP)  btnP.textContent  = 'Iniciar';
+      if (label) label.textContent = 'Listo para empezar';
+    });
+
+    document.querySelectorAll('.timer-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.timer-mode-btn').forEach(b => b.classList.remove('timer-mode-btn--active'));
+        btn.classList.add('timer-mode-btn--active');
+        const modo  = btn.dataset.mode;
+        duracion    = DURACIONES[modo]  || DURACIONES.pomodoro;
+        tipoActual  = TIPOS[modo]       || 'estudio';
+        clearInterval(intervalo);
+        corriendo = false; restante = duracion; render();
+        if (btnP)  btnP.textContent  = 'Iniciar';
+        if (label) label.textContent = 'Listo para empezar';
+      });
+    });
+
+    render();
+    actualizarDots();
+    if ('Notification' in window && Notification.permission === 'default')
+      Notification.requestPermission();

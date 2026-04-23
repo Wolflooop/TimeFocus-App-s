@@ -6,26 +6,23 @@ block page
       a.back-btn(href='/tareas') ←
       h1.page-header__title Nueva tarea
 
+  if error
+    p.error-msg= error
+
   form(action='/tareas' method='POST')
     .form-card
 
       .form-field
-        label.form-label Título
+        label.form-label Título *
         input.form-input(type="text" name="titulo" placeholder="Ej. Examen de Matemáticas" required)
 
       .form-field
         label.form-label Materia
-        select.form-input(name="materia")
-          option(value="" disabled selected) Selecciona una materia
-          option(value="calculo") Cálculo diferencial
-          option(value="poo") Programación OO
-          option(value="bd") Base de datos
-          option(value="fisica") Física General
-          option(value="etica") Ética Profesional
+        input.form-input(type="text" name="materia" placeholder="Ej. Cálculo, Programación, Física...")
 
       .form-field
         label.form-label Fecha de entrega
-        input.form-input(type="date" name="fecha")
+        input.form-input(type="date" name="fecha_limite")
 
       .form-field
         label.form-label Prioridad
@@ -35,13 +32,7 @@ block page
           button.form-pill(type="button" data-group="prioridad" value="baja") Baja
         input(type="hidden" name="prioridad" id="prioridad-val" value="media")
 
-      .form-field
-        label.form-label Estado inicial
-        .form-pills-row
-          button.form-pill.form-pill--active(type="button" data-group="estado" value="pendiente") Pendiente
-          button.form-pill(type="button" data-group="estado" value="en_curso") En curso
-          button.form-pill(type="button" data-group="estado" value="hecha") Hecha
-        input(type="hidden" name="estado" id="estado-val" value="pendiente")
+      input(type="hidden" name="estado" value="pendiente")
 
       .form-field
         label.form-label Notas
@@ -49,3 +40,4 @@ block page
 
     .form-footer
       button.btn-primary(type="submit") Crear tarea →
+      a.btn-cancel(href='/tareas') Cancelar

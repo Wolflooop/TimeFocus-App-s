@@ -3,83 +3,13 @@ extends ../layouts/app
 block page
   .page-header
     h1.page-header__title Temas
-    a.btn-primary(href='/temas/nueva') + Nuevo Tema
 
-  .temas-grid
-    //- Materia 1
-    .card.tema-card
-      .tema-card__header
-        .tema-card__color.tema-card__color--blue
-        .tema-card__info
-          h3.tema-card__name Cálculo Diferencial
-          p.tema-card__teacher Prof. Martínez
-      .tema-card__stats
-        span.tema-card__stat 12 tareas
-        span.tema-card__dot ·
-        span.tema-card__stat 8 completadas
-      .progress-bar
-        .progress-bar__fill(style="width: 67%")
-      p.tema-card__pct 67%
-
-    //- Materia 2
-    .card.tema-card
-      .tema-card__header
-        .tema-card__color.tema-card__color--green
-        .tema-card__info
-          h3.tema-card__name Programación OO
-          p.tema-card__teacher Prof. López
-      .tema-card__stats
-        span.tema-card__stat 8 tareas
-        span.tema-card__dot ·
-        span.tema-card__stat 7 completadas
-      .progress-bar
-        .progress-bar__fill(style="width: 87%")
-      p.tema-card__pct 87%
-
-    //- Materia 3
-    .card.tema-card
-      .tema-card__header
-        .tema-card__color.tema-card__color--yellow
-        .tema-card__info
-          h3.tema-card__name Base de Datos
-          p.tema-card__teacher Prof. Sánchez
-      .tema-card__stats
-        span.tema-card__stat 6 tareas
-        span.tema-card__dot ·
-        span.tema-card__stat 2 completadas
-      .progress-bar
-        .progress-bar__fill(style="width: 33%")
-      p.tema-card__pct 33%
-
-    //- Materia 4
-    .card.tema-card
-      .tema-card__header
-        .tema-card__color.tema-card__color--red
-        .tema-card__info
-          h3.tema-card__name Física General
-          p.tema-card__teacher Prof. Ramírez
-      .tema-card__stats
-        span.tema-card__stat 5 tareas
-        span.tema-card__dot ·
-        span.tema-card__stat 1 completada
-      .progress-bar
-        .progress-bar__fill(style="width: 20%")
-      p.tema-card__pct 20%
-
-    //- Materia 5
-    .card.tema-card
-      .tema-card__header
-        .tema-card__color.tema-card__color--purple
-        .tema-card__info
-          h3.tema-card__name Ética Profesional
-          p.tema-card__teacher Prof. García
-      .tema-card__stats
-        span.tema-card__stat 3 tareas
-        span.tema-card__dot ·
-        span.tema-card__stat 3 completadas
-      .progress-bar
-        .progress-bar__fill(style="width: 100%")
-      p.tema-card__pct 100% ✓
+  .card
+    .empty-state(style='padding:40px;text-align:center')
+      .empty-state__icon(style='font-size:48px;margin-bottom:16px') 📚
+      h3(style='color:#ccc;margin-bottom:8px') No tienes temas aún
+      p(style='color:#888;margin-bottom:24px;font-size:14px') Organiza tus materias para vincularlas con tareas y sesiones de estudio.
+      a.btn-primary(href='/temas/nueva') + Crear primer tema
 
   .fab-container
-     a.btn-primary(href='/temas/nueva') + Nuevo Tema
+    a.fab(href='/temas/nueva') + Nuevo Tema

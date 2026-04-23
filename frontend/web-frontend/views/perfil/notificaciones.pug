@@ -10,9 +10,9 @@ block page
     .form-field
       label.form-label Notificaciones generales
       .toggle-row
-        span Activar notificaciones
+        span Activar notificaciones del navegador
         label.toggle
-          input(type="checkbox" id="notif-general" checked)
+          input(type="checkbox" id="notif-general")
           span.toggle__slider
 
     .form-field
@@ -20,7 +20,7 @@ block page
       .toggle-row
         span Recordarme cuando una tarea vence hoy
         label.toggle
-          input(type="checkbox" id="notif-tareas" checked)
+          input(type="checkbox" id="notif-tareas")
           span.toggle__slider
 
     .form-field
@@ -40,16 +40,18 @@ block page
       .toggle-row
         span Recibir resumen de productividad cada semana
         label.toggle
-          input(type="checkbox" id="notif-semanal" checked)
+          input(type="checkbox" id="notif-semanal")
           span.toggle__slider
 
     .form-field
-      label.form-label Sonido de notificaciones
+      label.form-label Sonido al terminar Pomodoro
       .toggle-row
         span Activar sonido al terminar sesión Pomodoro
         label.toggle
-          input(type="checkbox" id="notif-sonido" checked)
+          input(type="checkbox" id="notif-sonido")
           span.toggle__slider
+
+    #notif-status(style='font-size:13px;color:#888;min-height:18px;margin-bottom:8px')
 
     .form-footer
       button.btn-primary(type="button" onclick="guardarNotif()") Guardar cambios →
@@ -98,7 +100,52 @@ block page
     .toggle input:checked + .toggle__slider:before { transform: translateX(22px); }
 
   script.
-    function guardarNotif() {
-      alert('Notificaciones guardadas correctamente ✅');
-      window.location.href = '/perfil';
+    // ── Cargar preferencias guardadas ─────────────────────────────
+    const prefs = JSON.parse(localStorage.getItem('tf_notif') || '{}');
+    document.getElementById('notif-general').checked  = prefs.general  ?? false;
+    document.getElementById('notif-tareas').checked   = prefs.tareas   ?? false;
+    document.getElementById('notif-estudio').checked  = prefs.estudio  ?? false;
+    document.getElementById('notif-semanal').checked  = prefs.semanal  ?? false;
+    document.getElementById('notif-sonido').checked   = prefs.sonido   ?? false;
+    if (prefs.hora) document.getElementById('hora').value = prefs.hora;
+
+    // Mostrar estado actual del permiso de notificaciones
+    const status = document.getElementById('notif-status');
+    const updateStatus = () => {
+      if (!('Notification' in window)) {
+        status.textContent = '⚠️ Tu navegador no soporta notificaciones.';
+      } else if (Notification.permission === 'granted') {
+        status.textContent = '✅ Notificaciones del navegador: activadas';
+        status.style.color = '#4caf50';
+      } else if (Notification.permission === 'denied') {
+        status.textContent = '🚫 Notificaciones bloqueadas en el navegador. Actívalas desde la configuración del sitio.';
+        status.style.color = '#e53935';
+      } else {
+        status.textContent = '🔔 Al guardar se solicitará permiso de notificaciones.';
+      }
+    };
+    updateStatus();
+
+    async function guardarNotif() {
+      // Solicitar permiso si está activado el toggle general
+      if (document.getElementById('notif-general').checked && 'Notification' in window) {
+        if (Notification.permission === 'default') {
+          await Notification.requestPermission();
+        }
+        updateStatus();
+      }
+
+      // Guardar en localStorage
+      localStorage.setItem('tf_notif', JSON.stringify({
+        general: document.getElementById('notif-general').checked,
+        tareas:  document.getElementById('notif-tareas').checked,
+        estudio: document.getElementById('notif-estudio').checked,
+        semanal: document.getElementById('notif-semanal').checked,
+        sonido:  document.getElementById('notif-sonido').checked,
+        hora:    document.getElementById('hora').value,
+      }));
+
+      status.textContent = '✅ Preferencias guardadas correctamente';
+      status.style.color = '#4caf50';
+      setTimeout(() => { window.location.href = '/perfil'; }, 1000);
     }

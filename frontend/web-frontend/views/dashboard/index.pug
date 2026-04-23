@@ -3,58 +3,96 @@ extends ../layouts/app
 block page
   .page-header
     .page-header__left
-      h1.page-header__greeting Hola, J osue 
-      p.page-header__date= fecha || 'Domingo 22 de Marzo 2026'
+      h1.page-header__greeting Hola, #{user ? user.nombre : 'Usuario'} 👋
+      p.page-header__date= fecha || 'Hoy'
 
   .dashboard-grid
-    //- Tarjeta Timer activo
-    .card.card--dark.card--timer
-      p.timer__time 18:42
-      .timer__progress
-        .timer__progress-bg
-        .timer__progress-fill
-      p.timer__subject Calculo diferencial
-      p.timer__session Sesión 3 de 4
-
-    //- Stats rápidas
+    //- Stats rápidas reales
     .stats-row
       .stat-card
-        p.stat-card__value 4.2 h
+        p.stat-card__value= stats ? Math.round((stats.hoy.minutos_hoy || 0) / 60 * 10) / 10 + ' h' : '0 h'
         p.stat-card__label Hoy
       .stat-card
-        p.stat-card__value.stat-card__value--green 7
+        p.stat-card__value= totalTareas || 0
         p.stat-card__label Tareas
       .stat-card
-        p.stat-card__value.stat-card__value--yellow 3
+        p.stat-card__value.stat-card__value--yellow= pendientes || 0
         p.stat-card__label Pendientes
+      .stat-card
+        p.stat-card__value.stat-card__value--green= stats ? Math.round((stats.semana.minutos_semana || 0) / 60 * 10) / 10 + ' h' : '0 h'
+        p.stat-card__label Esta semana
 
-    //- Tareas de hoy
+    //- Tarjeta Timer
+    .card.card--dark.card--timer
+      a(href='/timer' style='text-decoration:none;color:inherit;')
+        p.timer__time#dash-timer 25:00
+        .timer__progress
+          .timer__progress-bg
+          .timer__progress-fill#dash-progress
+        p.timer__subject Ir al temporizador →
+        p.timer__session Técnica Pomodoro
+
+    //- Tareas recientes
     .card.card--tasks
-      h2.card__title Tareas de hoy
-      ul.task-list
-        li.task-list__item
-          input.task-list__check(type="checkbox" checked)
-          span Ejercicio cap 5
-          .task-badge.task-badge--done Hecho
-        li.task-list__item
-          input.task-list__check(type="checkbox")
-          span Proyecto POO
-          .task-badge.task-badge--course Curso
-        li.task-list__item.task-list__item--urgent
-          input.task-list__check(type="checkbox")
-          span Entrega reporte
-          .task-badge.task-badge--urgent Urgente
+      .card__header
+        h2.card__title Tareas recientes
+        a.card__link(href='/tareas') Ver todas →
+      if tareas && tareas.length > 0
+        ul.task-list
+          each tarea in tareas
+            li.task-list__item(class=tarea.prioridad === 'alta' ? 'task-list__item--urgent' : '')
+              input.task-list__check(
+                type='checkbox'
+                checked=tarea.estado === 'completada'
+                data-id=tarea.id_tarea
+              )
+              span= tarea.titulo
+              if tarea.prioridad === 'alta'
+                .task-badge.task-badge--urgent Urgente
+              else if tarea.estado === 'completada'
+                .task-badge.task-badge--done Hecha
+              else if tarea.estado === 'en_curso'
+                .task-badge.task-badge--course En curso
+      else
+        .empty-state
+          p No tienes tareas aún.
+          a.btn-primary(href='/tareas/nueva') + Nueva Tarea
 
-    //- Activity Stream
+    //- Accesos rápidos
     .card.card--activity
-      h2.card__title Activity Stream
+      h2.card__title Accesos rápidos
       ul.activity-list
         li.activity-list__item
           .activity-list__dot.activity-list__dot--green
-          span Calculo diferencial
+          a(href='/timer') Iniciar sesión Pomodoro
         li.activity-list__item
-          .activity-list__dot.activity-list__dot--red
-          span Base de datos
+          .activity-list__dot.activity-list__dot--yellow
+          a(href='/tareas/nueva') Nueva tarea
         li.activity-list__item
           .activity-list__dot.activity-list__dot--gray
-          span Metricas 
+          a(href='/estadisticas') Ver mis estadísticas
+        li.activity-list__item
+          .activity-list__dot.activity-list__dot--red
+          a(href='/temas') Mis materias
+
+  script.
+    // Mini timer del dashboard (solo visual)
+    let dashRestante = 25 * 60;
+    const dashDisplay = document.getElementById('dash-timer');
+    const dashProgress = document.getElementById('dash-progress');
+    const renderDash = () => {
+      const m = String(Math.floor(dashRestante / 60)).padStart(2, '0');
+      const s = String(dashRestante % 60).padStart(2, '0');
+      if (dashDisplay) dashDisplay.textContent = `${m}:${s}`;
+      const pct = ((25 * 60 - dashRestante) / (25 * 60)) * 100;
+      if (dashProgress) dashProgress.style.width = pct + '%';
+    };
+    renderDash();
+
+    // Checkboxes de tareas
+    document.querySelectorAll('.task-list__check').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const item = cb.closest('.task-list__item');
+        if (item) item.classList.toggle('task-list__item--done', cb.checked);
+      });
+    });

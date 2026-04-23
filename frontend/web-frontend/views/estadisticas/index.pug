@@ -1,62 +1,73 @@
 extends ../layouts/app
 
 block page
+  .page-header
+    h1.page-header__title Estadísticas
+
+  if stats
+    //- Stats rápidas reales
+    .stats-row(style='margin-bottom:24px')
+      .stat-card
+        p.stat-card__value= Math.round((stats.hoy.minutos_hoy || 0) / 60 * 10) / 10 + ' h'
+        p.stat-card__label Hoy
+      .stat-card
+        p.stat-card__value= Math.round((stats.semana.minutos_semana || 0) / 60 * 10) / 10 + ' h'
+        p.stat-card__label Esta semana
+      .stat-card
+        p.stat-card__value= stats.hoy.sesiones_hoy || 0
+        p.stat-card__label Sesiones hoy
+      .stat-card
+        p.stat-card__value.stat-card__value--green= stats.tareas.completadas || 0
+        p.stat-card__label Tareas hechas
+      .stat-card
+        p.stat-card__value.stat-card__value--yellow= stats.tareas.pendientes || 0
+        p.stat-card__label Pendientes
+
   .stats-page
     .stats-page__left
-      h2.card__title Horario
+      h2.card__title Sesiones recientes
       .card
-        .schedule-list
-          .schedule-item
-            span.schedule-item__time 8:00
-            .schedule-item__bar
-              span Calculo diferencial - Aula 122
-          .schedule-item
-            span.schedule-item__time 9:00
-            .schedule-item__bar
-              span Calculo diferencial
-          .schedule-item
-            span.schedule-item__time 10:00
-            .schedule-item__bar
-              span POO - Lab 3
-          .schedule-item
-            span.schedule-item__time 11:00
-            .schedule-item__bar.schedule-item__bar--yellow
-              span Pomodoro - Estudio
-          .schedule-item
-            span.schedule-item__time 12:00
-            .schedule-item__bar
-              span Base de datos - Lab 5
-          .schedule-item
-            span.schedule-item__time 13:00
-            .schedule-item__bar
-              span Base de datos
+        if sesiones && sesiones.length > 0
+          .schedule-list
+            each ses in sesiones.slice(0, 8)
+              .schedule-item
+                span.schedule-item__time= ses.hora_inicio ? ses.hora_inicio.substring(0, 5) : '--:--'
+                .schedule-item__bar(class=ses.tipo === 'descanso' ? 'schedule-item__bar--yellow' : '')
+                  span= (ses.materia || ses.tipo || 'Estudio') + ' · ' + (ses.duracion_minutos || 0) + ' min'
+        else
+          .empty-state(style='padding:20px;text-align:center;color:#666')
+            p No hay sesiones registradas aún.
+            a(href='/timer') Ir al timer →
 
     .stats-page__right
-      h2.card__title Correlación de hábitos
+      h2.card__title Resumen de productividad
       .card.card--stats
-        h3.stats-section__title Hora de estudio vs Calificaciones
-        .habits-bars
-          .habits-bar-row
-            span.habits-bar__label Sem1
-            span.habits-bar__value 28h - 9.1
-            .habits-bar__track
-              .habits-bar__fill(style="width:88%")
-          .habits-bar-row
-            span.habits-bar__label Sem1
-            span.habits-bar__value 24h - 8.4
-            .habits-bar__track
-              .habits-bar__fill(style="width:73%")
-          .habits-bar-row
-            span.habits-bar__label Sem1
-            span.habits-bar__value 18h - 7.3
-            .habits-bar__track
-              .habits-bar__fill(style="width:56%")
-          .habits-bar-row
-            span.habits-bar__label Sem1
-            span.habits-bar__value 12h - 6.5
-            .habits-bar__track
-              .habits-bar__fill(style="width:30%")
+        if stats
+          h3.stats-section__title Tiempo de estudio
+          .habits-bars
+            .habits-bar-row
+              span.habits-bar__label Hoy
+              span.habits-bar__value= Math.round((stats.hoy.minutos_hoy || 0) / 60 * 10) / 10 + ' h'
+              .habits-bar__track
+                .habits-bar__fill(style='width:' + Math.min(((stats.hoy.minutos_hoy || 0) / 240) * 100, 100) + '%')
+            .habits-bar-row
+              span.habits-bar__label Semana
+              span.habits-bar__value= Math.round((stats.semana.minutos_semana || 0) / 60 * 10) / 10 + ' h'
+              .habits-bar__track
+                .habits-bar__fill(style='width:' + Math.min(((stats.semana.minutos_semana || 0) / 1200) * 100, 100) + '%')
 
-        h3.stats-section__title Horas pico de distracción
-        .heatmap-placeholder
-          p (Mapa de calor)
+          h3.stats-section__title(style='margin-top:20px') Tareas
+          .habits-bars
+            .habits-bar-row
+              span.habits-bar__label Total
+              span.habits-bar__value= stats.tareas.total || 0
+              .habits-bar__track
+                .habits-bar__fill(style='width:100%')
+            .habits-bar-row
+              span.habits-bar__label Hechas
+              span.habits-bar__value= stats.tareas.completadas || 0
+              .habits-bar__track
+                .habits-bar__fill(style='width:' + (stats.tareas.total > 0 ? Math.round(((stats.tareas.completadas || 0) / stats.tareas.total) * 100) : 0) + '%')
+        else
+          .empty-state(style='padding:20px;text-align:center;color:#666')
+            p Completa tu primera sesión para ver estadísticas.
