@@ -1,21 +1,43 @@
 // index.js
-const express = require('express');
-const cors    = require('cors');
 require('dotenv').config();
+const express     = require('express');
+const cors        = require('cors');
+const helmet      = require('helmet');
+const rateLimit   = require('express-rate-limit');
 
 const app = express();
 
-app.use(cors({ origin: '*' }));
-app.use(express.json({ limit: '5mb' }));
+// ── SEGURIDAD: Headers HTTP seguros ─────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false, // desactivado para permitir inline scripts del frontend
+}));
+
+// ── SEGURIDAD: CORS solo al frontend ────────────────────────────
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// ── SEGURIDAD: Rate limit en auth (max 20 intentos / 15 min) ────
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Demasiados intentos. Espera 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/auth',          require('./src/routes/auth'));
+app.use('/api/auth',          authLimiter, require('./src/routes/auth'));
 app.use('/api/tasks',         require('./src/routes/tasks'));
 app.use('/api/sessions',      require('./src/routes/sessions'));
 app.use('/api/schedule',      require('./src/routes/schedule'));
 app.use('/api/notifications', require('./src/routes/notifications'));
+app.use('/api/account',       require('./src/routes/account'));
 
-// Health check
 app.get('/api/health', (req, res) => res.json({ ok: true, ts: new Date() }));
 app.get('/', (req, res) => res.json({ mensaje: 'TimeFocus API corriendo ✅' }));
 
