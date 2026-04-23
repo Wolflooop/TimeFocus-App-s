@@ -13,10 +13,23 @@ exports.getSessions = async (req, res) => {
 
 exports.createSession = async (req, res) => {
   const { fecha, hora_inicio, hora_fin, duracion_minutos, tipo, materia } = req.body;
+
+  // Mapear tipos del frontend a los valores del ENUM de la BD
+  // BD acepta: estudio, descanso_corto, descanso_largo
+  const tipoMap = {
+    'estudio':        'estudio',
+    'descanso':       'descanso_corto',
+    'descanso_corto': 'descanso_corto',
+    'descanso_largo': 'descanso_largo',
+  };
+  const tipoFinal = tipoMap[tipo] || 'estudio';
+
   try {
     const [result] = await pool.query(
-      'INSERT INTO sesiones_estudio (id_usuario, fecha, hora_inicio, hora_fin, duracion_minutos, tipo, materia, completada) VALUES (?,?,?,?,?,?,?,1)',
-      [req.user.id, fecha, hora_inicio, hora_fin, duracion_minutos, tipo || 'estudio', materia || null]
+      `INSERT INTO sesiones_estudio
+         (id_usuario, fecha, hora_inicio, hora_fin, duracion_minutos, tipo, materia, completada)
+       VALUES (?,?,?,?,?,?,?,1)`,
+      [req.user.id, fecha, hora_inicio, hora_fin, duracion_minutos, tipoFinal, materia || null]
     );
     res.status(201).json({ id_sesion: result.insertId, mensaje: 'Sesión guardada' });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -37,7 +50,7 @@ exports.getStats = async (req, res) => {
     const [tasks] = await pool.query(
       `SELECT COUNT(*) as total,
         SUM(estado='completada') as completadas,
-        SUM(estado='pendiente') as pendientes
+        SUM(estado IN ('pendiente','en_curso','en_progreso')) as pendientes
        FROM tareas WHERE id_usuario=?`,
       [req.user.id]
     );
