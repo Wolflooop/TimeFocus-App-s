@@ -46,12 +46,14 @@ block page
           .danger-item__info
             p.danger-item__title Eliminar historial
             p.danger-item__desc Borra todo tu historial de sesiones y actividad
-          button.btn-danger(type="button" onclick="eliminarHistorial()") Eliminar
+          button.btn-danger#btn-del-historial(type="button") Eliminar
         .danger-item
           .danger-item__info
             p.danger-item__title Eliminar cuenta
             p.danger-item__desc Elimina permanentemente tu cuenta y todos tus datos
-          button.btn-danger(type="button" onclick="eliminarCuenta()") Eliminar
+          button.btn-danger#btn-del-cuenta(type="button") Eliminar
+
+    #priv-status(style='font-size:13px;min-height:18px;margin-top:4px')
 
     .form-footer
       button.btn-primary(type="button" onclick="guardarPrivacidad()") Guardar cambios →
@@ -98,7 +100,6 @@ block page
     }
     .toggle input:checked + .toggle__slider { background: #1976d2; }
     .toggle input:checked + .toggle__slider:before { transform: translateX(22px); }
-
     .danger-box {
       background: #fff5f5;
       border: 1px solid #ffcdd2;
@@ -113,16 +114,8 @@ block page
       border-bottom: 1px solid #ffcdd2;
     }
     .danger-item:last-child { border-bottom: none; }
-    .danger-item__title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #1a1a2e;
-      margin-bottom: 4px;
-    }
-    .danger-item__desc {
-      font-size: 13px;
-      color: #666;
-    }
+    .danger-item__title { font-size:15px; font-weight:600; color:#1a1a2e; margin-bottom:4px; }
+    .danger-item__desc  { font-size:13px; color:#666; }
     .btn-danger {
       background: transparent;
       color: #e53935;
@@ -136,22 +129,73 @@ block page
       flex-shrink: 0;
     }
     .btn-danger:hover { background: #e53935; color: white; }
+    .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
 
   script.
+    const status = document.getElementById('priv-status');
+
+    function setStatus(msg, color) {
+      status.textContent = msg;
+      status.style.color = color || '#666';
+    }
+
     function guardarPrivacidad() {
-      alert('Privacidad actualizada correctamente ✅');
-      window.location.href = '/perfil';
+      // Solo visual — no hay backend para estas preferencias
+      setStatus('✅ Preferencias de privacidad guardadas', '#4caf50');
+      setTimeout(() => { window.location.href = '/perfil'; }, 1000);
     }
 
-    function eliminarHistorial() {
-      if (confirm('¿Estás seguro de que deseas eliminar tu historial? Esta acción no se puede deshacer.')) {
-        alert('Historial eliminado ✅');
-      }
-    }
+    // ── Eliminar historial ─────────────────────────────────────────
+    document.getElementById('btn-del-historial').addEventListener('click', async () => {
+      const ok = confirm('¿Seguro que deseas borrar TODO tu historial de sesiones? Esta acción no se puede deshacer.');
+      if (!ok) return;
 
-    function eliminarCuenta() {
-      if (confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es permanente.')) {
-        alert('Cuenta eliminada. Hasta pronto 👋');
-        window.location.href = '/';
+      const btn = document.getElementById('btn-del-historial');
+      btn.disabled = true;
+      btn.textContent = 'Eliminando...';
+      try {
+        const res = await fetch('/api/account/sessions', { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok) {
+          setStatus('✅ Historial eliminado correctamente', '#4caf50');
+          btn.textContent = 'Eliminado';
+        } else {
+          setStatus('❌ Error: ' + (data.error || 'No se pudo eliminar'), '#e53935');
+          btn.disabled = false;
+          btn.textContent = 'Eliminar';
+        }
+      } catch {
+        setStatus('❌ Error de conexión', '#e53935');
+        btn.disabled = false;
+        btn.textContent = 'Eliminar';
       }
-    }
+    });
+
+    // ── Eliminar cuenta ────────────────────────────────────────────
+    document.getElementById('btn-del-cuenta').addEventListener('click', async () => {
+      const confirmar = prompt('Escribe ELIMINAR para confirmar que deseas borrar tu cuenta permanentemente:');
+      if (confirmar !== 'ELIMINAR') {
+        if (confirmar !== null) setStatus('❌ Debes escribir exactamente: ELIMINAR', '#e53935');
+        return;
+      }
+
+      const btn = document.getElementById('btn-del-cuenta');
+      btn.disabled = true;
+      btn.textContent = 'Eliminando...';
+      try {
+        const res = await fetch('/api/account/me', { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok) {
+          alert('Tu cuenta ha sido eliminada. Hasta pronto 👋');
+          window.location.href = '/logout';
+        } else {
+          setStatus('❌ Error: ' + (data.error || 'No se pudo eliminar la cuenta'), '#e53935');
+          btn.disabled = false;
+          btn.textContent = 'Eliminar';
+        }
+      } catch {
+        setStatus('❌ Error de conexión', '#e53935');
+        btn.disabled = false;
+        btn.textContent = 'Eliminar';
+      }
+    });

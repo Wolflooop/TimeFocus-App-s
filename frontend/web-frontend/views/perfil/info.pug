@@ -5,50 +5,25 @@ block page
     a.back-btn(href='/perfil') ←
     h1.page-header__title Mi Información
 
-  .form-card
+  form(action='/perfil/info' method='POST')
+    .form-card
 
-    .form-field
-      label.form-label Nombre completo
-      input.form-input(type="text" id="nombre" name="nombre" placeholder="Ej. Josue Oloarte" value="Josue Oloarte")
+      .form-field
+        label.form-label Nombre
+        input.form-input(type='text' name='nombre' placeholder='Nombre' value=user ? user.nombre : '')
 
-    .form-field
-      label.form-label Correo electrónico
-      input.form-input(type="email" id="correo" name="correo" placeholder="Ej. josue@email.com")
+      .form-field
+        label.form-label Apellido paterno
+        input.form-input(type='text' name='apellido_paterno' placeholder='Apellido paterno' value=user ? (user.apellido_paterno || '') : '')
 
-    .form-field
-      label.form-label Carrera
-      input.form-input(type="text" id="carrera" name="carrera" placeholder="Ej. Ingeniería en Software")
+      .form-field
+        label.form-label Correo electrónico
+        input.form-input(type='email' name='email' placeholder='Correo' value=user ? user.email : '' readonly)
 
-    .form-field
-      label.form-label Semestre
-      input.form-input(type="number" id="semestre" name="semestre" placeholder="Ej. 5" min="1" max="12")
-
-    .form-field
-      label.form-label Institución
-      input.form-input(type="text" id="institucion" name="institucion" placeholder="Ej. UTXJ")
-
-    .form-field
-      label.form-label Rol
-      input.form-input(type="text" id="rol" name="rol" placeholder="Ej. Desarrollador de Software" value="Desarrollador de Software")
+      .form-field
+        label.form-label Carrera
+        input.form-input(type='text' name='nombre_carrera' placeholder='Carrera' value=user ? (user.nombre_carrera || '') : '')
 
     .form-footer
-      button.btn-primary(type="button" onclick="guardarInfo()") Guardar cambios →
+      button.btn-primary(type='submit') Guardar cambios →
       a.btn-cancel(href='/perfil') Cancelar
-  
-  script.
-    function guardarInfo() {
-      const nombre      = document.getElementById('nombre').value.trim();
-      const correo      = document.getElementById('correo').value.trim();
-      const carrera     = document.getElementById('carrera').value.trim();
-      const semestre    = document.getElementById('semestre').value;
-      const institucion = document.getElementById('institucion').value.trim();
-      const rol         = document.getElementById('rol').value.trim();
-
-      if (!nombre || !correo) {
-        alert('Por favor completa el nombre y el correo.');
-        return;
-      }
-
-      alert('Información actualizada correctamente ✅');
-      window.location.href = '/perfil';
-    }

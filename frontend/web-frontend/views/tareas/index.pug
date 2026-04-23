@@ -4,66 +4,145 @@ block page
   .page-header
     h1.page-header__title Tareas
     .filter-tabs
-      a.filter-tab.filter-tab--active(href='?filtro=todas') Todas
-      a.filter-tab(href='?filtro=hoy') Hoy
-      a.filter-tab(href='?filtro=semana') Semana
-      a.filter-tab(href='?filtro=pendientes') Pendientes
+      a.filter-tab(href='/tareas' class=filtro === 'todas' ? 'filter-tab--active' : '') Todas
+      a.filter-tab(href='/tareas?filtro=pendiente' class=filtro === 'pendiente' ? 'filter-tab--active' : '') Pendientes
+      a.filter-tab(href='/tareas?filtro=en_progreso' class=filtro === 'en_progreso' ? 'filter-tab--active' : '') En progreso
+      a.filter-tab(href='/tareas?filtro=completada' class=filtro === 'completada' ? 'filter-tab--active' : '') Completadas
 
   .tareas-list
-    //- URGENTE
-    .tareas-section
-      .tareas-section__label.tareas-section__label--urgent
-        .tareas-section__bar
-        span URGENTE
-      .card
-        .tarea-item
-          .tarea-item__thumb.tarea-item__thumb--urgent
-          .tarea-item__info
-            p.tarea-item__name Entrega reporte de BD
-            p.tarea-item__sub Base de datos · vence hoy
-          .tarea-item__progress
-            .progress-bar
-              .progress-bar__fill(style="width: 86%")
+    if tareas && tareas.length > 0
 
-    //- EN CURSO
-    .tareas-section
-      .tareas-section__label.tareas-section__label--course
-        .tareas-section__bar
-        span EN CURSO
-      .card
-        .tarea-item
-          .tarea-item__thumb.tarea-item__thumb--blue
-          .tarea-item__info
-            p.tarea-item__name Proyecto POO - Fase 2
-            p.tarea-item__sub Programación · 22 feb
-          .tarea-item__progress
-            .progress-bar
-              .progress-bar__fill(style="width: 87%")
-        .tarea-item
-          .tarea-item__thumb.tarea-item__thumb--blue
-          .tarea-item__info
-            p.tarea-item__name Examen matemáticas
-            p.tarea-item__sub Cálculo · 25 feb
-          .tarea-item__progress
-            .progress-bar
-              .progress-bar__fill(style="width: 87%")
+      //- URGENTES: alta prioridad + pendiente (no en progreso, no completada)
+      - const urgentes = tareas.filter(t => t.prioridad === 'alta' && t.estado === 'pendiente')
+      if urgentes.length > 0
+        .tareas-section
+          .tareas-section__label.tareas-section__label--urgent
+            .tareas-section__bar
+            span URGENTE
+          .card
+            each tarea in urgentes
+              .tarea-item
+                .tarea-item__thumb.tarea-item__thumb--urgent
+                .tarea-item__info
+                  p.tarea-item__name= tarea.titulo
+                  p.tarea-item__sub= (tarea.materia || 'Sin materia') + (tarea.fecha_limite ? ' · ' + new Date(tarea.fecha_limite).toLocaleDateString('es-MX') : '')
+                .tarea-item__actions
+                  form(action='/tareas/' + tarea.id_tarea + '/estado' method='POST' style='display:inline')
+                    input(type='hidden' name='estado' value='en_progreso')
+                    button.btn-action.btn-action--start(type='submit' title='Iniciar') ▶
+                  form(action='/tareas/' + tarea.id_tarea + '/estado' method='POST' style='display:inline')
+                    input(type='hidden' name='estado' value='completada')
+                    button.btn-action.btn-action--done(type='submit' title='Completar') ✓
+                  form(action='/tareas/' + tarea.id_tarea + '/eliminar' method='POST' style='display:inline')
+                    button.btn-action.btn-action--del(type='submit' title='Eliminar') ✕
 
-    //- PENDIENTE
-    .tareas-section
-      .tareas-section__label
-        .tareas-section__bar
-        span PENDIENTE
+      //- EN PROGRESO (todos los estados en_progreso)
+      - const enProgreso = tareas.filter(t => t.estado === 'en_progreso')
+      if enProgreso.length > 0
+        .tareas-section
+          .tareas-section__label.tareas-section__label--course
+            .tareas-section__bar
+            span EN PROGRESO
+          .card
+            each tarea in enProgreso
+              .tarea-item
+                .tarea-item__thumb.tarea-item__thumb--blue
+                .tarea-item__info
+                  p.tarea-item__name= tarea.titulo
+                  p.tarea-item__sub= (tarea.materia || 'Sin materia') + (tarea.fecha_limite ? ' · ' + new Date(tarea.fecha_limite).toLocaleDateString('es-MX') : '')
+                .tarea-item__actions
+                  form(action='/tareas/' + tarea.id_tarea + '/estado' method='POST' style='display:inline')
+                    input(type='hidden' name='estado' value='completada')
+                    button.btn-action.btn-action--done(type='submit' title='Completar') ✓
+                  form(action='/tareas/' + tarea.id_tarea + '/eliminar' method='POST' style='display:inline')
+                    button.btn-action.btn-action--del(type='submit' title='Eliminar') ✕
+
+      //- PENDIENTES normales (baja/media prioridad)
+      - const pendientes = tareas.filter(t => t.estado === 'pendiente' && t.prioridad !== 'alta')
+      if pendientes.length > 0
+        .tareas-section
+          .tareas-section__label
+            .tareas-section__bar
+            span PENDIENTE
+          .card
+            each tarea in pendientes
+              .tarea-item
+                .tarea-item__thumb
+                .tarea-item__info
+                  p.tarea-item__name= tarea.titulo
+                  p.tarea-item__sub= (tarea.materia || 'Sin materia') + (tarea.fecha_limite ? ' · ' + new Date(tarea.fecha_limite).toLocaleDateString('es-MX') : '')
+                .tarea-item__actions
+                  form(action='/tareas/' + tarea.id_tarea + '/estado' method='POST' style='display:inline')
+                    input(type='hidden' name='estado' value='en_progreso')
+                    button.btn-action.btn-action--start(type='submit' title='Iniciar') ▶
+                  form(action='/tareas/' + tarea.id_tarea + '/estado' method='POST' style='display:inline')
+                    input(type='hidden' name='estado' value='completada')
+                    button.btn-action.btn-action--done(type='submit' title='Completar') ✓
+                  form(action='/tareas/' + tarea.id_tarea + '/eliminar' method='POST' style='display:inline')
+                    button.btn-action.btn-action--del(type='submit' title='Eliminar') ✕
+
+      //- COMPLETADAS
+      - const completadas = tareas.filter(t => t.estado === 'completada')
+      if completadas.length > 0
+        .tareas-section
+          .tareas-section__label.tareas-section__label--done
+            .tareas-section__bar
+            span COMPLETADAS
+          .card
+            each tarea in completadas
+              .tarea-item.tarea-item--done
+                .tarea-item__thumb.tarea-item__thumb--done
+                .tarea-item__info
+                  p.tarea-item__name= tarea.titulo
+                  p.tarea-item__sub= tarea.materia || 'Sin materia'
+                .tarea-item__actions
+                  form(action='/tareas/' + tarea.id_tarea + '/estado' method='POST' style='display:inline')
+                    input(type='hidden' name='estado' value='pendiente')
+                    button.btn-action.btn-action--undo(type='submit' title='Reabrir') ↩
+                  form(action='/tareas/' + tarea.id_tarea + '/eliminar' method='POST' style='display:inline')
+                    button.btn-action.btn-action--del(type='submit' title='Eliminar') ✕
+    else
       .card
-        .tarea-item
-          .tarea-item__thumb
-          .tarea-item__info
-            p.tarea-item__name Práctica de laboratorio
-            p.tarea-item__sub Física · sin fecha
-        .tarea-item
-          .tarea-item__thumb
-          .tarea-item__info
-            p.tarea-item__name Lectura Ética
-            p.tarea-item__sub Humanidades · 28 feb
+        .empty-state
+          p No hay tareas en esta categoría.
+          a.btn-primary(href='/tareas/nueva') + Crear tarea
 
   .fab-container
     a.fab(href='/tareas/nueva') + Nueva Tarea
+
+  style.
+    .tarea-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .tarea-item:last-child { border-bottom: none; }
+    .tarea-item__info { flex: 1; min-width: 0; }
+    .tarea-item__name { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tarea-item__sub  { font-size: 12px; color: #888; margin-top: 2px; }
+    .tarea-item__actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .btn-action {
+      background: transparent;
+      border-radius: 50%;
+      width: 32px; height: 32px;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      border: 1.5px solid transparent;
+      flex-shrink: 0;
+    }
+    .btn-action--done  { border-color: #c8e6c9; color: #4caf50; }
+    .btn-action--done:hover  { background: #4caf50; color: white; }
+    .btn-action--del   { border-color: #ffcdd2; color: #e53935; }
+    .btn-action--del:hover   { background: #e53935; color: white; }
+    .btn-action--start { border-color: #bbdefb; color: #1976d2; }
+    .btn-action--start:hover { background: #1976d2; color: white; }
+    .btn-action--undo  { border-color: #e0e0e0; color: #999; }
+    .btn-action--undo:hover  { background: #e0e0e0; color: #333; }
+    .tareas-section__label--done .tareas-section__bar { background: #4caf50; }
+    .tarea-item--done .tarea-item__name { text-decoration: line-through; color: #999; }
+    .tarea-item__thumb--done { background: #4caf50; }
+    .filter-tab--active { font-weight: 700; border-bottom: 2px solid currentColor; }
