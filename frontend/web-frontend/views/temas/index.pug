@@ -4,12 +4,60 @@ block page
   .page-header
     h1.page-header__title Temas
 
-  .card
-    .empty-state(style='padding:40px;text-align:center')
-      .empty-state__icon(style='font-size:48px;margin-bottom:16px') 📚
-      h3(style='color:#ccc;margin-bottom:8px') No tienes temas aún
-      p(style='color:#888;margin-bottom:24px;font-size:14px') Organiza tus materias para vincularlas con tareas y sesiones de estudio.
-      a.btn-primary(href='/temas/nueva') + Crear primer tema
+  if temas && temas.length > 0
+    .temas-grid
+      each tema in temas
+        .tema-card(style=`border-left: 5px solid ${tema.color || '#1976d2'}`)
+          .tema-card__header
+            .tema-color-dot(style=`background:${tema.color || '#1976d2'}`)
+            h3.tema-card__nombre= tema.nombre
+          .tema-card__info
+            if tema.profesor
+              p.tema-card__profesor 👤 #{tema.profesor}
+            p.tema-card__tareas 📋 #{tema.num_tareas || 0} tareas
+          .tema-card__actions
+            form(action=`/temas/${tema.id_tema}/eliminar` method='POST' onsubmit="return confirm('¿Eliminar este tema?')")
+              button.btn-delete(type='submit') Eliminar
+  else
+    .card
+      .empty-state(style='padding:40px;text-align:center')
+        .empty-state__icon(style='font-size:48px;margin-bottom:16px') 📚
+        h3(style='color:#ccc;margin-bottom:8px') No tienes temas aún
+        p(style='color:#888;margin-bottom:24px;font-size:14px') Organiza tus materias para vincularlas con tareas y sesiones de estudio.
+        a.btn-primary(href='/temas/nueva') + Crear primer tema
 
   .fab-container
     a.fab(href='/temas/nueva') + Nuevo Tema
+
+  style.
+    .temas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      padding: 8px 0;
+    }
+    .tema-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .tema-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .tema-card__header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .tema-color-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+    .tema-card__nombre { font-size: 17px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .tema-card__info { margin-bottom: 16px; }
+    .tema-card__profesor, .tema-card__tareas { font-size: 13px; color: #666; margin: 4px 0; }
+    .tema-card__actions { display: flex; justify-content: flex-end; }
+    .btn-delete {
+      background: transparent;
+      border: 1px solid #f44336;
+      color: #f44336;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-delete:hover { background: #f44336; color: #fff; }

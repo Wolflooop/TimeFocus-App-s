@@ -4,10 +4,10 @@ block page
   .page-header
     h1.page-header__title Tareas
     .filter-tabs
-      a.filter-tab(href='/tareas' class=filtro === 'todas' ? 'filter-tab--active' : '') Todas
-      a.filter-tab(href='/tareas?filtro=pendiente' class=filtro === 'pendiente' ? 'filter-tab--active' : '') Pendientes
-      a.filter-tab(href='/tareas?filtro=en_progreso' class=filtro === 'en_progreso' ? 'filter-tab--active' : '') En progreso
-      a.filter-tab(href='/tareas?filtro=completada' class=filtro === 'completada' ? 'filter-tab--active' : '') Completadas
+      a.filter-tab(href='/tareas' class=filtro === 'todas' ? 'filter-tab--active filter-tab--todas' : '') Todas
+      a.filter-tab(href='/tareas?filtro=pendiente' class=filtro === 'pendiente' ? 'filter-tab--active filter-tab--pendiente' : '') Pendientes
+      a.filter-tab(href='/tareas?filtro=en_progreso' class=filtro === 'en_progreso' ? 'filter-tab--active filter-tab--progreso' : '') En progreso
+      a.filter-tab(href='/tareas?filtro=completada' class=filtro === 'completada' ? 'filter-tab--active filter-tab--completada' : '') Completadas
 
   .tareas-list
     if tareas && tareas.length > 0
@@ -105,7 +105,7 @@ block page
       .card
         .empty-state
           p No hay tareas en esta categoría.
-          a.btn-primary(href='/tareas/nueva') + Crear tarea
+              //a.btn-primary(href='/tareas/nueva') + Crear tarea
 
   .fab-container
     a.fab(href='/tareas/nueva') + Nueva Tarea
@@ -146,3 +146,7 @@ block page
     .tarea-item--done .tarea-item__name { text-decoration: line-through; color: #999; }
     .tarea-item__thumb--done { background: #4caf50; }
     .filter-tab--active { font-weight: 700; border-bottom: 2px solid currentColor; }
+    .filter-tab--todas      { background: #1a2f4e !important; color: #fff !important; border-color: #1a2f4e !important; }
+    .filter-tab--pendiente  { background: #f59e0b !important; color: #fff !important; border-color: #f59e0b !important; }
+    .filter-tab--progreso   { background: #1976d2 !important; color: #fff !important; border-color: #1976d2 !important; }
+    .filter-tab--completada { background: #4caf50 !important; color: #fff !important; border-color: #4caf50 !important; }

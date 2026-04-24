@@ -33,6 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/auth',          authLimiter, require('./src/routes/auth'));
 app.use('/api/tasks',         require('./src/routes/tasks'));
+app.use('/api/temas',         require('./src/routes/temas'));
 app.use('/api/sessions',      require('./src/routes/sessions'));
 app.use('/api/schedule',      require('./src/routes/schedule'));
 app.use('/api/notifications', require('./src/routes/notifications'));
@@ -52,3 +53,4 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n🍅 TimeFocus API en puerto ${PORT}`);
   console.log(`   http://localhost:${PORT}/api/health\n`);
 });
+ 

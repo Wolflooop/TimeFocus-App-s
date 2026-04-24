@@ -214,9 +214,41 @@ app.post('/tareas/:id/eliminar', authWeb, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 // TEMAS
 // ══════════════════════════════════════════════════════════════════
-app.get('/temas',       authWeb, (req, res) => res.render('temas/index', { title: 'Temas',      currentPage: 'temas' }));
-app.get('/temas/nueva', authWeb, (req, res) => res.render('temas/nueva', { title: 'Nuevo Tema', currentPage: 'temas' }));
-app.post('/temas',      authWeb, (req, res) => res.redirect('/temas'));
+app.get('/temas', authWeb, async (req, res) => {
+  try {
+    const { data: temas } = await apiGet('/temas', req.session.token);
+    res.render('temas/index', { title: 'Temas', currentPage: 'temas', temas });
+  } catch {
+    res.render('temas/index', { title: 'Temas', currentPage: 'temas', temas: [] });
+  }
+});
+
+app.get('/temas/nueva', authWeb, (req, res) => {
+  res.render('temas/nueva', { title: 'Nuevo Tema', currentPage: 'temas', error: null });
+});
+
+app.post('/temas', authWeb, async (req, res) => {
+  const { nombre, profesor, color, tareas } = req.body;
+  if (!nombre?.trim())
+    return res.render('temas/nueva', { title: 'Nuevo Tema', currentPage: 'temas', error: 'El nombre del tema es obligatorio' });
+  try {
+    await apiPost('/temas', {
+      nombre:     nombre.trim(),
+      profesor:   profesor?.trim() || null,
+      color:      color || '#1976d2',
+      num_tareas: tareas ? parseInt(tareas) : 0,
+    }, req.session.token);
+    res.redirect('/temas');
+  } catch (err) {
+    const msg = err.response?.data?.error || 'Error al crear el tema';
+    res.render('temas/nueva', { title: 'Nuevo Tema', currentPage: 'temas', error: msg });
+  }
+});
+
+app.post('/temas/:id/eliminar', authWeb, async (req, res) => {
+  try { await apiDel(`/temas/${req.params.id}`, req.session.token); } catch {}
+  res.redirect('/temas');
+});
 
 // ══════════════════════════════════════════════════════════════════
 // TIMER
@@ -285,3 +317,4 @@ app.use((req, res) => res.status(404).send('Página no encontrada'));
 app.listen(PORT, () => {
   console.log(`✅ TimeFocus Web corriendo en http://localhost:${PORT}`);
 });
+ 
