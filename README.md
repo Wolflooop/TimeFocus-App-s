@@ -12,6 +12,9 @@
 TimeFocus es una aplicación móvil desarrollada para mejorar la productividad académica de estudiantes universitarios mediante herramientas como la gestión de tareas, la técnica Pomodoro y un sistema de autenticación segura. Su diseño busca fomentar la organización, la disciplina y el aprovechamiento eficiente del tiempo de estudio.
 </p>
 
+### LOGO
+
+<img src="assets/logo.jpg" width="80%" style="padding: 10px;" />
 
 
 ### DESCRIPCION
