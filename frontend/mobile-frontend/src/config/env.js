@@ -1,10 +1,3 @@
-// ─── Configuración de entorno ────────────────────────────────────
-// Cambia API_URL según tu entorno:
-//   Desarrollo local:  'http://TU_IP_LOCAL:3000/api'
-//   Producción:        'https://tu-dominio.com/api'
-//
-// Para encontrar tu IP local en Windows: ipconfig → IPv4 Address
-// Para encontrar tu IP local en Mac/Linux: ifconfig | grep inet
 
 const ENV = {
   development: {
