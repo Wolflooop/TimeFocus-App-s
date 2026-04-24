@@ -20,6 +20,8 @@ let MediaLibrary = null;
 try { Calendar    = require('expo-calendar'); }    catch (_) {}
 try { MediaLibrary = require('expo-media-library'); } catch (_) {}
 
+import { useAuth } from '../../context/AuthContext';
+
 const C = {
   bg:     colors.background,
   card:   '#FFFFFF',
@@ -45,6 +47,8 @@ const ic = StyleSheet.create({
 });
 
 export default function PrivacyScreen({ onBack }) {
+  const { user } = useAuth();
+  const userEmail = user?.email || 'tu correo registrado';
   const [settings, setSettings] = useState({
     app_monitor:    true,
     correlation:    true,
@@ -121,7 +125,7 @@ export default function PrivacyScreen({ onBack }) {
   const handleDownloadData = () => {
     Alert.alert('Descargar mis datos', 'Se preparará un archivo JSON con toda tu información en TimeFocus. Lo recibirás por correo electrónico en menos de 24 horas.', [
       { text:'Cancelar', style:'cancel' },
-      { text:'Solicitar', onPress: () => Alert.alert('Solicitud enviada ✅', 'Recibirás tus datos en ana.garcia@utxj.edu.mx') },
+      { text:'Solicitar', onPress: () => Alert.alert('Solicitud enviada ✅', `Recibirás tus datos en ${userEmail}`) },
     ]);
   };
 

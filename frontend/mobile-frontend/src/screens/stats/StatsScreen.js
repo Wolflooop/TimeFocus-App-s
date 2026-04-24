@@ -7,8 +7,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  StatusBar, SafeAreaView, ActivityIndicator, RefreshControl,
+  StatusBar, ActivityIndicator, RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { colors } from '../../theme/colors';
 import { W, rs, rv, font, space, radius } from '../../theme/responsive';
@@ -57,7 +58,7 @@ const bh = StyleSheet.create({
 // ══════════════════════════════════════════════════════
 //  VIEW 1 — HABITOS TIMEFOCUS (datos reales)
 // ══════════════════════════════════════════════════════
-function HabitsView({ onRefresh }) {
+function HabitsView() {
   const [data,      setData]      = useState(null);
   const [loading,   setLoading]   = useState(true);
   const [refreshing,setRefreshing]= useState(false);
@@ -86,7 +87,6 @@ function HabitsView({ onRefresh }) {
     );
   }
 
-  // Convertir porDia a array de 7 posiciones (L=2, M=3, X=4, J=5, V=6, S=7, D=1)
   const barData = [2, 3, 4, 5, 6, 7, 1].map(dow => {
     const found = (data?.porDia || []).find(r => r.dia === dow);
     return found ? Math.round(found.minutos / 60 * 10) / 10 : 0;
@@ -110,14 +110,12 @@ function HabitsView({ onRefresh }) {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={C.navy}/>}>
 
-      {/* Tarjeta de hoy */}
       <View style={hv.heroCard}>
         <Text style={hv.heroLabel}>HOY</Text>
         <Text style={hv.heroTime}>{fmtMin(minutosHoy)}</Text>
         <Text style={hv.heroSub}>{sesionesHoy} sesión{sesionesHoy !== 1 ? 'es' : ''} Pomodoro completada{sesionesHoy !== 1 ? 's' : ''}</Text>
       </View>
 
-      {/* Tarjeta de semana con grafica */}
       <View style={hv.weekCard}>
         <Text style={hv.cardTitle}>HORAS DE ESTUDIO · ESTA SEMANA</Text>
         <Text style={hv.weekBig}>{horasSem}<Text style={hv.weekUnit}>h</Text></Text>
@@ -135,13 +133,12 @@ function HabitsView({ onRefresh }) {
         </View>
       </View>
 
-      {/* Stats grid */}
       <View style={hv.grid}>
         {[
-          { num: sesionesSem,   label: 'Sesiones 🍅',   color: C.navy },
-          { num: `${taskPct}%`, label: 'Tareas ✓',      color: C.success },
-          { num: `${avgPerDay}h`, label: 'Promedio/día', color: C.social },
-          { num: `${diasRacha}🔥`, label: 'Días activos', color: C.other },
+          { num: sesionesSem,     label: 'Sesiones 🍅',   color: C.navy },
+          { num: `${taskPct}%`,   label: 'Tareas ✓',      color: C.success },
+          { num: `${avgPerDay}h`, label: 'Promedio/día',  color: C.social },
+          { num: `${diasRacha}🔥`,label: 'Días activos',  color: C.other },
         ].map((s, i) => (
           <View key={i} style={hv.statCard}>
             <Text style={[hv.statNum, { color: s.color }]}>{s.num}</Text>
@@ -150,7 +147,6 @@ function HabitsView({ onRefresh }) {
         ))}
       </View>
 
-      {/* Meta semanal */}
       <View style={hv.goalCard}>
         <View style={hv.goalHeader}>
           <Text style={hv.goalTitle}>Meta semanal (30h)</Text>
@@ -162,7 +158,6 @@ function HabitsView({ onRefresh }) {
         <Text style={hv.goalNote}>{horasSem}h de 30h objetivo</Text>
       </View>
 
-      {/* Tareas */}
       <View style={hv.goalCard}>
         <View style={hv.goalHeader}>
           <Text style={hv.goalTitle}>Tareas completadas</Text>
@@ -178,34 +173,34 @@ function HabitsView({ onRefresh }) {
 }
 
 const hv = StyleSheet.create({
-  scroll:       { paddingHorizontal:space.screen, paddingBottom:rv(30), paddingTop:rv(4) },
-  heroCard:     { backgroundColor:C.navy, borderRadius:radius.lg, padding:rv(18), marginBottom:rv(14) },
-  heroLabel:    { fontSize:font.xs, fontWeight:'700', color:'rgba(255,255,255,0.5)', letterSpacing:1, marginBottom:rv(4) },
-  heroTime:     { fontSize:rs(44), fontWeight:'800', color:'#fff', letterSpacing:-2 },
-  heroSub:      { fontSize:font.sm, color:'rgba(255,255,255,0.65)', marginTop:rv(4) },
-  weekCard:     { backgroundColor:C.navy, borderRadius:radius.lg, padding:rv(18), marginBottom:rv(14) },
-  cardTitle:    { fontSize:font.xs, fontWeight:'700', color:'rgba(255,255,255,0.5)', letterSpacing:1, marginBottom:rv(4) },
-  weekBig:      { fontSize:rs(42), fontWeight:'800', color:'#fff', letterSpacing:-2 },
-  weekUnit:     { fontSize:rs(26), fontWeight:'700' },
-  chart:        { flexDirection:'row', alignItems:'flex-end', height:rv(80), gap:6, marginTop:rv(12) },
-  barCol:       { flex:1, alignItems:'center', justifyContent:'flex-end', gap:6 },
-  bar:          { width:'70%', borderRadius:4, minHeight:rv(4) },
-  dayLbl:       { fontSize:font.xs, color:'rgba(255,255,255,0.5)', fontWeight:'600' },
-  grid:         { flexDirection:'row', flexWrap:'wrap', gap:rv(10), marginBottom:rv(14) },
-  statCard:     { flex:1, minWidth:(W-space.screen*2-rv(10))/2-1, backgroundColor:C.card, borderRadius:radius.lg, padding:rv(16), alignItems:'center', shadowColor:'#000', shadowOpacity:0.04, shadowRadius:8, shadowOffset:{width:0,height:2}, elevation:2 },
-  statNum:      { fontSize:rs(28), fontWeight:'800' },
-  statLabel:    { fontSize:font.sm, color:C.muted, fontWeight:'500', marginTop:2 },
-  goalCard:     { backgroundColor:C.card, borderRadius:radius.lg, padding:rv(16), marginBottom:rv(14), shadowColor:'#000', shadowOpacity:0.04, shadowRadius:8, shadowOffset:{width:0,height:2}, elevation:2 },
-  goalHeader:   { flexDirection:'row', justifyContent:'space-between', marginBottom:rv(10) },
-  goalTitle:    { fontSize:font.md, fontWeight:'700', color:C.navy },
-  goalPct:      { fontSize:font.md, fontWeight:'800' },
-  goalBarBg:    { height:rv(10), borderRadius:99, backgroundColor:'#E8ECF4', overflow:'hidden', marginBottom:rv(6) },
-  goalBarFill:  { height:'100%', borderRadius:99, backgroundColor:C.success },
-  goalNote:     { fontSize:font.sm, color:C.muted },
+  scroll:      { paddingHorizontal:space.screen, paddingBottom:rv(30), paddingTop:rv(4) },
+  heroCard:    { backgroundColor:C.navy, borderRadius:radius.lg, padding:rv(18), marginBottom:rv(14) },
+  heroLabel:   { fontSize:font.xs, fontWeight:'700', color:'rgba(255,255,255,0.5)', letterSpacing:1, marginBottom:rv(4) },
+  heroTime:    { fontSize:rs(44), fontWeight:'800', color:'#fff', letterSpacing:-2 },
+  heroSub:     { fontSize:font.sm, color:'rgba(255,255,255,0.65)', marginTop:rv(4) },
+  weekCard:    { backgroundColor:C.navy, borderRadius:radius.lg, padding:rv(18), marginBottom:rv(14) },
+  cardTitle:   { fontSize:font.xs, fontWeight:'700', color:'rgba(255,255,255,0.5)', letterSpacing:1, marginBottom:rv(4) },
+  weekBig:     { fontSize:rs(42), fontWeight:'800', color:'#fff', letterSpacing:-2 },
+  weekUnit:    { fontSize:rs(26), fontWeight:'700' },
+  chart:       { flexDirection:'row', alignItems:'flex-end', height:rv(80), gap:6, marginTop:rv(12) },
+  barCol:      { flex:1, alignItems:'center', justifyContent:'flex-end', gap:6 },
+  bar:         { width:'70%', borderRadius:4, minHeight:rv(4) },
+  dayLbl:      { fontSize:font.xs, color:'rgba(255,255,255,0.5)', fontWeight:'600' },
+  grid:        { flexDirection:'row', flexWrap:'wrap', gap:rv(10), marginBottom:rv(14) },
+  statCard:    { flex:1, minWidth:(W-space.screen*2-rv(10))/2-1, backgroundColor:C.card, borderRadius:radius.lg, padding:rv(16), alignItems:'center', shadowColor:'#000', shadowOpacity:0.04, shadowRadius:8, shadowOffset:{width:0,height:2}, elevation:2 },
+  statNum:     { fontSize:rs(28), fontWeight:'800' },
+  statLabel:   { fontSize:font.sm, color:C.muted, fontWeight:'500', marginTop:2 },
+  goalCard:    { backgroundColor:C.card, borderRadius:radius.lg, padding:rv(16), marginBottom:rv(14), shadowColor:'#000', shadowOpacity:0.04, shadowRadius:8, shadowOffset:{width:0,height:2}, elevation:2 },
+  goalHeader:  { flexDirection:'row', justifyContent:'space-between', marginBottom:rv(10) },
+  goalTitle:   { fontSize:font.md, fontWeight:'700', color:C.navy },
+  goalPct:     { fontSize:font.md, fontWeight:'800' },
+  goalBarBg:   { height:rv(10), borderRadius:99, backgroundColor:'#E8ECF4', overflow:'hidden', marginBottom:rv(6) },
+  goalBarFill: { height:'100%', borderRadius:99, backgroundColor:C.success },
+  goalNote:    { fontSize:font.sm, color:C.muted },
 });
 
 // ══════════════════════════════════════════════════════
-//  VIEW 2 — USO DEL DISPOSITIVO (placeholder hasta tener permiso)
+//  VIEW 2 — USO DEL DISPOSITIVO (placeholder)
 // ══════════════════════════════════════════════════════
 function DeviceUsageView() {
   return (
