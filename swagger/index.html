@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TimeFocus API — Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #0d1117;
+      --ink-2:     #161b27;
+      --ink-3:     #1e2535;
+      --border:    rgba(255,255,255,.07);
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --accent:    #38bdf8;
+      --accent-dim:#0c4a6e;
+      --green:     #4ade80;
+      --mono:      'DM Mono', monospace;
+      --sans:      'Sora', sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: #f8fafc;
+      color: var(--text);
+    }
+
+    /* ─── TOP NAV ─────────────────────────────── */
+    .nav {
+      background: var(--ink);
+      border-bottom: 1px solid var(--border);
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo svg { flex-shrink: 0; }
+    .nav-logo-text {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
+      letter-spacing: -.2px;
+    }
+    .nav-logo-text span { color: var(--accent); }
+
+    .nav-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+    }
+
+    .nav-pill {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 4px;
+      letter-spacing: .3px;
+    }
+
+    .nav-spacer { flex: 1; }
+
+    .status-dot {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .status-dot svg { animation: pulse 2.4s ease-in-out infinite; }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: .4; }
+    }
+
+    .nav-link {
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color .15s;
+    }
+    .nav-link:hover { color: var(--text); }
+
+    /* ─── HERO BAND ───────────────────────────── */
+    .hero {
+      background: var(--ink-2);
+      border-bottom: 1px solid var(--border);
+      padding: 36px 32px 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 600px 300px at 80% 50%, rgba(56,189,248,.06) 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.025) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.025) 40px);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .hero-left { flex: 1; min-width: 260px; }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .hero-title {
+      font-size: 26px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -.5px;
+      line-height: 1.2;
+    }
+    .hero-title span {
+      color: transparent;
+      background: linear-gradient(90deg, var(--accent), #818cf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      margin-top: 8px;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 440px;
+    }
+
+    /* ─── META CHIPS ──────────────────────────── */
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .meta-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-family: var(--mono);
+      color: #94a3b8;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      padding: 5px 11px;
+      border-radius: 6px;
+    }
+    .meta-chip svg { opacity: .65; }
+    .meta-chip strong { color: #cbd5e1; font-weight: 500; }
+
+    /* ─── ENDPOINT STATS ──────────────────────── */
+    .hero-right {
+      display: flex;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      align-self: flex-start;
+      flex-shrink: 0;
+    }
+    .stat-cell {
+      background: var(--ink-3);
+      padding: 14px 22px;
+      text-align: center;
+      min-width: 80px;
+    }
+    .stat-cell:first-child { padding-left: 24px; }
+    .stat-cell:last-child  { padding-right: 24px; }
+
+    .stat-method {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .stat-count {
+      font-size: 22px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+      font-family: var(--mono);
+    }
+
+    .m-get    { color: #4ade80; }
+    .m-post   { color: #facc15; }
+    .m-put    { color: #fb923c; }
+    .m-delete { color: #f87171; }
+
+    /* ─── BASE URL BAR ────────────────────────── */
+    .url-bar {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .url-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #94a3b8;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .url-value {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: #1e293b;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      padding: 3px 10px;
+    }
+    .url-value a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .url-value a:hover { text-decoration: underline; }
+
+    .url-sep { color: #cbd5e1; font-size: 12px; }
+
+    .url-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    /* ─── SWAGGER CONTAINER ───────────────────── */
+    #swagger-ui {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 16px 64px;
+    }
+
+    /* Swagger UI overrides */
+    .swagger-ui .topbar       { display: none !important; }
+    .swagger-ui .info         { margin: 0 0 20px; }
+    .swagger-ui .info .title  { font-family: var(--sans); font-size: 20px; color: #0f172a; }
+    .swagger-ui .info p,
+    .swagger-ui .info li      { font-family: var(--sans); }
+    .swagger-ui .opblock-tag  { font-family: var(--sans); }
+    .swagger-ui .btn          { font-family: var(--sans); }
+    .swagger-ui input,
+    .swagger-ui textarea,
+    .swagger-ui select        { font-family: var(--mono); }
+
+    /* ─── FOOTER ──────────────────────────────── */
+    .footer {
+      background: var(--ink);
+      border-top: 1px solid var(--border);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .footer-text {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    .footer-text a { color: #475569; text-decoration: none; }
+    .footer-text a:hover { color: var(--accent); }
+    .footer-spacer { flex: 1; }
+    .footer-spec {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .footer-spec:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="#" class="nav-logo">
+      <!-- Clock icon -->
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="10" cy="10" r="8.5" stroke="#38bdf8" stroke-width="1.4"/>
+        <path d="M10 5.5V10.5L13 12.5" stroke="#38bdf8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="nav-logo-text">Time<span>Focus</span></span>
+    </a>
+    <div class="nav-divider"></div>
+    <span class="nav-pill">Public API</span>
+    <div class="nav-spacer"></div>
+    <div class="status-dot">
+      <!-- Green pulse dot SVG -->
+      <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+        <circle cx="4" cy="4" r="4" fill="#4ade80"/>
+      </svg>
+      Live
+    </div>
+    <div class="nav-divider"></div>
+    <a href="./swagger.yaml" class="nav-link" target="_blank">
+      <!-- File icon -->
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6L9 2z"/>
+        <path d="M9 2v4h4"/>
+      </svg>
+      swagger.yaml
+    </a>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <!-- Api icon -->
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M2 8h12M8 2l4 6-4 6"/>
+          </svg>
+          REST API — v1.0.0
+        </div>
+        <h1 class="hero-title">TimeFocus <span>Developer API</span></h1>
+        <p class="hero-desc">
+          Integra productividad y gestión del tiempo en tus aplicaciones. Autenticación por API Key, respuestas JSON estructuradas y rate limiting incluidos.
+        </p>
+        <div class="meta-row">
+          <div class="meta-chip">
+            <!-- Auth icon -->
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+              <rect x="3" y="7" width="10" height="7" rx="1.5"/>
+              <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>
+            </svg>
+            Auth: <strong>X-API-Key</strong>
+          </div>
+          <div class="meta-chip">
+            <!-- Rate icon -->
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M8 2v4l2.5 2.5"/>
+              <circle cx="8" cy="8" r="6"/>
+            </svg>
+            Rate limit: <strong>100 req/min</strong>
+          </div>
+          <div class="meta-chip">
+            <!-- DB icon -->
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+              <ellipse cx="8" cy="4.5" rx="5" ry="2"/>
+              <path d="M3 4.5v7c0 1.1 2.24 2 5 2s5-.9 5-2v-7"/>
+              <path d="M3 8c0 1.1 2.24 2 5 2s5-.9 5-2"/>
+            </svg>
+            Storage: <strong>SQLite</strong>
+          </div>
+          <div class="meta-chip">
+            <!-- Node icon -->
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+              <polygon points="8,1.5 14,5 14,11 8,14.5 2,11 2,5"/>
+            </svg>
+            Runtime: <strong>Node 20</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="stat-cell">
+          <div class="stat-method m-get">GET</div>
+          <div class="stat-count">6</div>
+          <div class="stat-label">endpoints</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-method m-post">POST</div>
+          <div class="stat-count">5</div>
+          <div class="stat-label">endpoints</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-method m-put">PUT</div>
+          <div class="stat-count">1</div>
+          <div class="stat-label">endpoints</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-method m-delete">DELETE</div>
+          <div class="stat-count">2</div>
+          <div class="stat-label">endpoints</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- URL BAR -->
+  <div class="url-bar">
+    <span class="url-label">Base URL</span>
+    <div class="url-value">
+      <a href="https://timefocus-app-s.onrender.com" target="_blank">https://timefocus-app-s.onrender.com</a>
+    </div>
+    <span class="url-sep">/</span>
+    <span class="url-tag">
+      <!-- Docs icon -->
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#94a3b8" stroke-width="1.5">
+        <path d="M2 3h12M2 7h8M2 11h6"/>
+      </svg>
+      /docs
+    </span>
+    <span class="url-sep">·</span>
+    <span class="url-tag">
+      <!-- Spec icon -->
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#94a3b8" stroke-width="1.5">
+        <path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6L9 2z"/>
+        <path d="M9 2v4h4"/>
+      </svg>
+      OpenAPI 3.0
+    </span>
+  </div>
+
+  <!-- SWAGGER UI -->
+  <div id="swagger-ui"></div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="footer-text">TimeFocus API &mdash; v1.0.0</span>
+    <span class="footer-text" style="color:#334155;">·</span>
+    <span class="footer-text">Powered by <a href="https://swagger.io/tools/swagger-ui/" target="_blank">Swagger UI</a></span>
+    <div class="footer-spacer"></div>
+    <a href="./swagger.yaml" class="footer-spec" target="_blank">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6L9 2z"/>
+        <path d="M9 2v4h4"/>
+      </svg>
+      Ver especificación OpenAPI
+    </a>
+  </footer>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+  <script>
+    SwaggerUIBundle({
+      url: "./swagger.yaml",
+      dom_id: "#swagger-ui",
+      presets: [
+        SwaggerUIBundle.presets.apis,
+        SwaggerUIStandalonePreset
+      ],
+      layout: "StandaloneLayout",
+      deepLinking: true,
+      displayRequestDuration: true,
+      defaultModelsExpandDepth: 1,
+      defaultModelExpandDepth: 1,
+      tryItOutEnabled: true,
+    });
+  </script>
+</body>
+</html>
